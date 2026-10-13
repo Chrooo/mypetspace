@@ -1,70 +1,54 @@
-# Getting Started with Create React App
+# My Pet Space
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Pet hotel and grooming booking system.
+React (Vite) + Ant Design on the front end, Express + MongoDB on the back end.
 
-## Available Scripts
+Needs Node.js 20.19 or newer and a MongoDB database (MongoDB Atlas or a local MongoDB).
 
-In the project directory, you can run:
+## First-time setup
 
-### `npm start`
+```bash
+# 1) website packages (in this folder)
+npm install
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+# 2) server packages
+cd server
+npm install
+```
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Create `server/.env` by copying `server/.env.example`, then fill it in
+(the `.env` file is never uploaded to GitHub, so every person makes their own).
 
-### `npm test`
+## Run it (two terminals, both stay open)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```bash
+# terminal 1: API server  ->  http://localhost:8000
+cd server
+npm run dev
 
-### `npm run build`
+# terminal 2: website     ->  http://localhost:3000
+npm run dev
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+The server terminal should print `injected env (7)`, `MongoDB connected`,
+and `Admin account created` the first time.
+If you change `.env`, type `rs` in the server terminal to restart it.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Accounts
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- Register on the website: creates a customer (Fur Parent).
+- The first Admin is created from `ADMIN_IDENTIFIER` and `ADMIN_PASSWORD` in `server/.env`.
+- Admins create Staff and Groomer accounts with `POST /api/createStaff`.
 
-### `npm run eject`
+## Folders
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+```
+index.html, vite.config.js, package.json   website setup (Vite)
+src/                                       website code
+  auth.js                                  saves the login token
+  components/Landing, Auth, Dashboard      pages
+server/                                    API (its own package.json)
+  server.js, models/, controllers/, routes/, middleware/
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Never run `npm init -y` in either folder.

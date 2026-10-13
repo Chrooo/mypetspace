@@ -83,16 +83,15 @@ function AuthPage({ mode }) {
         {/* Right: form */}
         <main className="auth-main">
           <nav className="auth-nav">
-            <Link to="/"><img src={logo} alt="My Pet Space" className="auth-nav-logo" /></Link>
-            <Link to={copy.switchTo} className="auth-nav-link">
-              {copy.switchLink}
+            <Link to="/" aria-label="Back to home">
+              <img src={logo} alt="My Pet Space" className="auth-nav-logo" />
             </Link>
           </nav>
 
           <section className="auth-form-wrap">
             <h2 className="auth-title">{copy.title}</h2>
 
-            {error && <Alert type="error" showIcon message={error} style={{ marginBottom: 16 }} />}
+            {error && <Alert type="error" showIcon title={error} style={{ marginBottom: 16 }} />}
 
             <Form layout="vertical" requiredMark={false} onFinish={onFinish} size="large">
               {isSignup && (

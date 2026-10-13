@@ -77,16 +77,10 @@
 
 .auth-nav {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  justify-content: center;
 }
 
-.auth-nav-logo { height: 56px; width: auto; }
-
-.auth-nav-link {
-  font-weight: 700;
-  color: var(--teal-dark);
-}
+.auth-nav-logo { display: block; height: 88px; width: auto; }
 
 .auth-form-wrap {
   width: 100%;
@@ -97,6 +91,7 @@
 
 .auth-title {
   margin: 0 0 22px;
+  text-align: center;
   font-size: 30px;
   font-weight: 800;
   color: var(--maroon);

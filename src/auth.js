@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Same server as the lesson (port 8000)
-export const API_URL = 'http://localhost:8000/api';
+export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 // every axios request will carry the login token (if there is one)
 const setHeader = (token) => {
