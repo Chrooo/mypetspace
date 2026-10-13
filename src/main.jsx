@@ -1,5 +1,5 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { ConfigProvider } from 'antd';
 import './index.css';
@@ -22,13 +22,12 @@ const theme = {
   },
 };
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <React.StrictMode>
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
     <ConfigProvider theme={theme}>
       <BrowserRouter>
         <App />
       </BrowserRouter>
     </ConfigProvider>
-  </React.StrictMode>
+  </StrictMode>
 );
