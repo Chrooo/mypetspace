@@ -102,4 +102,15 @@ const createStaff = async (req, res) => {
   }
 };
 
-module.exports = { register, login, createStaff };
+// GET /api/users  (admin only) - every account, newest first (passwords are never included)
+const listUsers = async (req, res) => {
+  try {
+    const users = await UserModel.find().sort({ createdAt: -1 });
+    res.json({ users });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+module.exports = { register, login, createStaff, listUsers };

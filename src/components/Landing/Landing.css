@@ -21,76 +21,6 @@
 .paw-2 { top: 29%; left: 35vw; transform: rotate(10deg); }
 .paw-3 { top: 62%; left: 38vw; fill: #c97b7b; transform: rotate(-8deg); }
 
-/* ---------- top bar ---------- */
-.landing-nav {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  padding: 20px 6vw;
-}
-
-/* the logo file has a white background: "multiply" lets the cream page show through it */
-.landing-logo { display: block; height: 72px; width: auto; mix-blend-mode: multiply; }
-
-.landing-links { display: flex; gap: 30px; margin: 0 auto; }
-.landing-links a {
-  padding: 4px 2px;
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--maroon);
-  text-decoration: none;
-  border-bottom: 2px solid transparent;
-  transition: border-color 0.2s;
-}
-.landing-links a:hover { border-bottom-color: var(--pink); }
-
-.landing-actions { display: flex; align-items: center; gap: 14px; margin-left: auto; }
-
-.icon-btn {
-  display: grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  font-size: 20px;
-  color: var(--maroon);
-  background: transparent;
-  border: 0;
-  border-radius: 50%;
-  cursor: pointer;
-}
-.icon-btn:hover { background: rgba(107, 30, 43, 0.08); }
-
-/* ---------- buttons ---------- */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 44px;
-  padding: 0 28px;
-  font: inherit;
-  font-size: 16px;
-  font-weight: 700;
-  text-decoration: none;
-  border: 3px solid transparent;
-  border-radius: 999px;
-  cursor: pointer;
-  transition: transform 0.15s, background 0.15s, color 0.15s;
-}
-.btn:hover { transform: translateY(-1px); }
-
-.btn-pink { background: var(--pink); border-color: var(--pink); color: #fff; }
-.btn-pink:hover { background: var(--pink-dark); border-color: var(--pink-dark); color: #fff; }
-
-.btn-outline-teal { background: transparent; border-color: var(--teal); color: var(--teal-dark); }
-.btn-outline-teal:hover { background: var(--teal); color: #fff; }
-
-.btn-outline-pink { background: transparent; border-color: var(--pink); color: var(--pink-dark); }
-.btn-outline-pink:hover { background: var(--pink); color: #fff; }
-
-.btn-lg { height: 58px; min-width: 210px; font-size: 18px; }
-
 /* ---------- hero ---------- */
 .landing-hero {
   position: relative;
@@ -121,11 +51,7 @@
 
 /* ---------- small screens ---------- */
 @media (max-width: 860px) {
-  .landing-links { display: none; }
-  .landing-nav { padding: 16px 5vw; }
-  .landing-logo { height: 56px; }
-  .btn { height: 40px; padding: 0 18px; font-size: 15px; }
-  .btn-lg { flex: 1 1 160px; min-width: 0; height: 52px; font-size: 16px; }
+  .landing .btn-lg { flex: 1 1 160px; min-width: 0; height: 52px; font-size: 16px; }
   .hero-actions { margin-top: 36px; gap: 14px; }
   .blob-pink { width: 70vw; }
   .blob-teal { width: 80vw; }
