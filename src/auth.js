@@ -29,3 +29,14 @@ export const logout = () => {
   localStorage.removeItem('user');
   setHeader(null);
 };
+
+// where each role lands after logging in (/dashboard redirects here)
+export const roleHome = (role) =>
+  ({ admin: '/admin', staff: '/staff', groomer: '/groomer', customer: '/account' }[role] || '/account');
+
+export const ROLE_LABELS = {
+  admin: { label: 'Admin', color: '#EE2A7B' },
+  staff: { label: 'Hotel Staff', color: '#0E969C' },
+  groomer: { label: 'Groomer', color: '#D99A72' },
+  customer: { label: 'Fur Parent', color: '#C9A58C' },
+};

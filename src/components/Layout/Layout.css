@@ -1,0 +1,138 @@
+/* ---------- buttons (used everywhere) ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  padding: 0 28px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: none;
+  border: 3px solid transparent;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: transform 0.15s, background 0.15s, color 0.15s;
+}
+.btn:hover { transform: translateY(-1px); }
+
+.btn-pink { background: var(--pink); border-color: var(--pink); color: #fff; }
+.btn-pink:hover { background: var(--pink-dark); border-color: var(--pink-dark); color: #fff; }
+
+.btn-outline-teal { background: transparent; border-color: var(--teal); color: var(--teal-dark); }
+.btn-outline-teal:hover { background: var(--teal); color: #fff; }
+
+.btn-outline-pink { background: transparent; border-color: var(--pink); color: var(--pink-dark); }
+.btn-outline-pink:hover { background: var(--pink); color: #fff; }
+
+.btn-lg { height: 58px; min-width: 210px; font-size: 18px; }
+
+.icon-btn {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  font-size: 20px;
+  color: var(--maroon);
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.icon-btn:hover { background: rgba(107, 30, 43, 0.08); }
+
+/* ---------- top bar of the public pages ---------- */
+.site-header {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 20px 6vw;
+}
+
+/* the logo file has a white background: "multiply" lets the cream page show through it */
+.site-logo { display: block; height: 72px; width: auto; mix-blend-mode: multiply; }
+
+.site-links { display: flex; gap: 30px; margin: 0 auto; }
+.site-links a {
+  padding: 4px 2px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--maroon);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  transition: border-color 0.2s;
+}
+.site-links a:hover,
+.site-links a.active { border-bottom-color: var(--pink); }
+
+.site-actions { display: flex; align-items: center; gap: 14px; margin-left: auto; }
+
+/* ---------- public inner pages ---------- */
+.page-shell { min-height: 100vh; background: #fdf9ea; color: var(--maroon); }
+.page-main { max-width: 960px; margin: 0 auto; padding: 24px 6vw 80px; }
+.page-back { display: inline-block; margin-bottom: 14px; font-weight: 700; color: var(--teal-dark); text-decoration: none; }
+.page-back:hover { text-decoration: underline; }
+.page-title { margin: 0 0 8px; font-size: clamp(30px, 5vw, 44px); font-weight: 800; }
+.page-sub { margin: 0 0 24px; max-width: 60ch; font-size: 18px; line-height: 1.55; }
+.page-links { display: flex; flex-wrap: wrap; gap: 14px; margin: 0 0 28px; }
+.page-steps { margin-bottom: 28px; overflow-x: auto; }
+.page-actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 28px; }
+
+/* the "planned" box on blank pages */
+.planned {
+  max-width: 560px;
+  padding: 18px 24px;
+  background: #fff;
+  border: 2px dashed var(--tan);
+  border-radius: 16px;
+}
+.planned h2 { margin: 0 0 8px; font-size: 16px; font-weight: 800; color: var(--teal-dark); }
+.planned ul { margin: 0; padding-left: 20px; line-height: 1.8; }
+
+/* ---------- dashboards (logged-in pages) ---------- */
+.dash { min-height: 100vh; background: #fdf9ea; color: var(--maroon); }
+.dash-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 6vw;
+  background: #fff;
+  box-shadow: 0 4px 18px rgba(107, 30, 43, 0.08);
+}
+.dash-logo { display: block; height: 56px; width: auto; }
+.dash-user { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; font-weight: 700; }
+.dash-main { max-width: 1040px; margin: 0 auto; padding: 28px 6vw 80px; }
+
+.dash-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; margin-bottom: 28px; }
+.stat { padding: 16px 18px; background: #fff; border: 2px solid var(--cream); border-radius: 16px; }
+.stat-label { font-size: 14px; font-weight: 700; color: var(--tan); }
+.stat-value { font-size: 30px; font-weight: 800; color: var(--teal-dark); }
+
+.dash-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; margin-bottom: 28px; }
+.dash-card {
+  display: block;
+  padding: 20px;
+  color: inherit;
+  text-decoration: none;
+  background: #fff;
+  border: 2px solid transparent;
+  border-radius: 18px;
+  box-shadow: 0 6px 18px rgba(107, 30, 43, 0.08);
+  transition: border-color 0.15s, transform 0.15s;
+}
+.dash-card:hover { border-color: var(--teal); transform: translateY(-2px); }
+.dash-card h3 { margin: 0 0 6px; font-size: 18px; font-weight: 800; color: var(--pink-dark); }
+.dash-card p { margin: 0; font-size: 14px; line-height: 1.5; }
+
+/* ---------- small screens ---------- */
+@media (max-width: 860px) {
+  .site-header { flex-wrap: wrap; gap: 10px 16px; padding: 16px 5vw; }
+  .site-logo { height: 56px; }
+  .site-links { order: 3; flex-wrap: wrap; justify-content: center; gap: 6px 18px; width: 100%; margin: 0; }
+  .site-links a { font-size: 16px; }
+  .btn { height: 40px; padding: 0 18px; font-size: 15px; }
+  .dash-top { flex-wrap: wrap; }
+}
