@@ -2,7 +2,7 @@ import { useState } from 'react';
 import axios from 'axios';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Alert, Button, Divider, Form, Input, Tooltip } from 'antd';
-import { FacebookFilled, GoogleOutlined, LockOutlined, MailOutlined, UserOutlined } from '@ant-design/icons';
+import { FacebookFilled, GoogleOutlined, LockOutlined, MailOutlined, SafetyCertificateOutlined, UserOutlined } from '@ant-design/icons';
 import { API_URL, getUser, saveLogin } from '../../auth';
 import logo from '../../assets/logo.png';
 import './AuthPage.css';
@@ -45,6 +45,8 @@ function AuthPage({ mode }) {
   const location = useLocation();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [ticket, setTicket] = useState(null); // set after the password is right and the account uses 2FA
+  const [useRecovery, setUseRecovery] = useState(false); // typing a recovery code instead of the app code
 
   // already logged in? go straight to the dashboard
   if (getUser()) return <Navigate to="/dashboard" replace />;
@@ -54,12 +56,40 @@ function AuthPage({ mode }) {
     setError('');
     try {
       const response = await axios.post(`${API_URL}/${isSignup ? 'register' : 'login'}`, values);
+
+      // two-factor is on for this account: ask for the code before logging in
+      if (response.data.twoFactorRequired) {
+        setTicket(response.data.twoFactorToken);
+        setSubmitting(false);
+        return;
+      }
+
       saveLogin(response.data); // saves the token and the user
       navigate(location.state?.from || '/dashboard', { replace: true });
     } catch (err) {
       setError(err.response?.data?.message || 'Could not reach the server. Please try again.');
       setSubmitting(false);
     }
+  };
+
+  // step 2 of logging in: the 6-digit code (or a recovery code)
+  const onVerify = async (values) => {
+    setSubmitting(true);
+    setError('');
+    try {
+      const response = await axios.post(`${API_URL}/login/2fa`, { twoFactorToken: ticket, code: values.code });
+      saveLogin(response.data);
+      navigate(location.state?.from || '/dashboard', { replace: true });
+    } catch (err) {
+      setError(err.response?.data?.message || 'Could not reach the server. Please try again.');
+      setSubmitting(false);
+    }
+  };
+
+  const backToLogin = () => {
+    setTicket(null);
+    setUseRecovery(false);
+    setError('');
   };
 
   return (
@@ -89,10 +119,50 @@ function AuthPage({ mode }) {
           </nav>
 
           <section className="auth-form-wrap">
-            <h2 className="auth-title">{copy.title}</h2>
+            <h2 className="auth-title">{ticket ? 'Two-step verification' : copy.title}</h2>
 
             {error && <Alert type="error" showIcon title={error} style={{ marginBottom: 16 }} />}
 
+            {ticket ? (
+              <>
+                <p style={{ margin: '0 0 16px', textAlign: 'center', lineHeight: 1.5 }}>
+                  {useRecovery
+                    ? 'Enter one of your recovery codes. Each code works only once.'
+                    : 'Open your authenticator app and enter the 6-digit code for My Pet Space.'}
+                </p>
+
+                <Form key={useRecovery ? 'recovery' : 'app'} layout="vertical" requiredMark={false} onFinish={onVerify} size="large">
+                  <Form.Item
+                    name="code"
+                    rules={[
+                      { required: true, message: useRecovery ? 'Enter a recovery code' : 'Enter the 6-digit code' },
+                      ...(useRecovery ? [] : [{ pattern: /^\s*\d{3}\s?\d{3}\s*$/, message: 'The code has 6 digits' }]),
+                    ]}
+                  >
+                    <Input
+                      prefix={<SafetyCertificateOutlined />}
+                      placeholder={useRecovery ? 'Recovery code (like a1b2c-3d4e5)' : '6-digit code'}
+                      inputMode={useRecovery ? 'text' : 'numeric'}
+                      autoComplete="one-time-code"
+                      autoFocus
+                    />
+                  </Form.Item>
+
+                  <Button type="primary" htmlType="submit" block loading={submitting} className="auth-submit">
+                    Verify
+                  </Button>
+                </Form>
+
+                <p style={{ margin: '22px 0 0', textAlign: 'center', fontSize: 14 }}>
+                  <Button type="link" onClick={() => { setUseRecovery(!useRecovery); setError(''); }}>
+                    {useRecovery ? 'Use my authenticator app' : 'Use a recovery code instead'}
+                  </Button>
+                  <br />
+                  <Button type="link" onClick={backToLogin}>Back to login</Button>
+                </p>
+              </>
+            ) : (
+              <>
             <Form layout="vertical" requiredMark={false} onFinish={onFinish} size="large">
               {isSignup && (
                 <Form.Item name="fullName" rules={[{ required: true, message: 'Enter your full name' }]}>
@@ -151,6 +221,8 @@ function AuthPage({ mode }) {
             <p className="auth-switch">
               {copy.switchText} <Link to={copy.switchTo}>{copy.switchLink}</Link>
             </p>
+              </>
+            )}
           </section>
         </main>
       </div>

@@ -6,6 +6,12 @@ const UserSchema = new mongoose.Schema(
     fullName: { type: String, required: true, trim: true },
     identifier: { type: String, required: true, unique: true }, // email OR phone number
     password: { type: String, required: true, select: false },
+
+    // two-factor authentication (an authenticator app such as Google Authenticator)
+    twoFactorEnabled: { type: Boolean, default: false },
+    twoFactorSecret: { type: String, select: false }, // the key shared with the authenticator app
+    twoFactorLastStep: { type: Number, default: 0, select: false }, // newest 30-second step already used, so a code can't be used twice
+    twoFactorRecoveryCodes: { type: [String], select: false }, // hashed one-time recovery codes
     role: {
       type: String,
       enum: ['admin', 'staff', 'groomer', 'customer'],
@@ -25,10 +31,13 @@ UserSchema.methods.comparePassword = function (plain) {
   return bcrypt.compare(plain, this.password);
 };
 
-// never send the password back to the browser
+// never send the password or the 2FA secrets back to the browser
 UserSchema.set('toJSON', {
   transform: (doc, ret) => {
     delete ret.password;
+    delete ret.twoFactorSecret;
+    delete ret.twoFactorLastStep;
+    delete ret.twoFactorRecoveryCodes;
     delete ret.__v;
     return ret;
   },

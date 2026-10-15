@@ -15,6 +15,9 @@ import GroomingPackages from './components/Public/GroomingPackages';
 import Rooms from './components/Public/Rooms';
 import Groomers from './components/Public/Groomers';
 
+// security (two-factor authentication)
+import Security from './components/Security/Security';
+
 // booking steps and receipt
 import PetDetails from './components/Booking/PetDetails';
 import SelectServices from './components/Booking/SelectServices';
@@ -75,6 +78,11 @@ function App() {
 
       {/* ---------- any logged-in user: sends each role to its own dashboard ---------- */}
       <Route path="/dashboard" element={<ProtectedRoute><DashboardRedirect /></ProtectedRoute>} />
+
+      {/* ---------- security settings: every logged-in role ---------- */}
+      <Route element={guard(['customer', 'groomer', 'staff', 'admin'])}>
+        <Route path="/security" element={<Security />} />
+      </Route>
 
       {/* ---------- booking (type is "grooming" or "room") ---------- */}
       <Route element={guard(['customer', 'staff', 'admin'])}>
