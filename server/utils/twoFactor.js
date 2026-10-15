@@ -1,3 +1,4 @@
+const { logAction } = require('../utils/audit');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const { authenticator } = require('otplib');

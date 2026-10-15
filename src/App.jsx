@@ -43,6 +43,7 @@ import AssignedServices from './components/Groomer/AssignedServices';
 
 // admin, staff and the pages they share
 import AdminDashboard from './components/Admin/AdminDashboard';
+import AuditLogs from './components/Admin/AuditLogs';
 import StaffDashboard from './components/Staff/StaffDashboard';
 import ManageReservations from './components/Manage/ManageReservations';
 import ManageRooms from './components/Manage/ManageRooms';
@@ -118,6 +119,7 @@ function App() {
       <Route element={guard(['admin'])}>
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/manage/users" element={<ManageUsers />} />
+        <Route path="/admin/audit-logs" element={<AuditLogs />} />
       </Route>
       <Route element={guard(['staff'])}>
         <Route path="/staff" element={<StaffDashboard />} />

@@ -1,5 +1,6 @@
 const UserModel = require('../models/User');
 const { makeToken, makeTwoFactorTicket } = require('../utils/tokens');
+const { logAction } = require('../utils/audit');
 
 /* ---------- helpers ---------- */
 
@@ -14,8 +15,14 @@ const cleanIdentifier = (value = '') => {
 };
 
 // returns an error message, or null if everything is fine
-const validate = ({ fullName, identifier, password }) => {
-  if (!fullName || !fullName.trim()) return 'Full name is required.';
+const NAME_RE = /^[A-Za-z\u00C0-\u024F][A-Za-z\u00C0-\u024F .'-]*$/;
+
+const validate = ({ firstName, lastName, identifier, password }) => {
+  if (!firstName || !firstName.trim()) return 'First name is required.';
+  if (!lastName || !lastName.trim()) return 'Last name is required.';
+  if (!NAME_RE.test(firstName.trim()) || !NAME_RE.test(lastName.trim()) || firstName.length > 50 || lastName.length > 50) {
+    return 'Names can only have letters, spaces, apostrophes, periods and hyphens (50 characters max).';
+  }
   if (!cleanIdentifier(identifier)) return 'Enter a valid email or a mobile number like 09123456789.';
   if (!password || password.length < 8 || !/[A-Za-z]/.test(password) || !/\d/.test(password)) {
     return 'Password must be at least 8 characters with a letter and a number.';
@@ -38,11 +45,13 @@ const register = async (req, res) => {
 
     // the role is NEVER taken from req.body, so nobody can sign up as admin
     const user = await UserModel.create({
-      fullName: req.body.fullName,
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
       identifier,
       password: req.body.password,
       role: 'customer',
     });
+    await logAction('New User Registered', user, `Fur Parent account: ${identifier}`);
 
     res.status(201).json({ token: makeToken(user), user });
   } catch (err) {
@@ -69,6 +78,7 @@ const login = async (req, res) => {
       return res.json({ twoFactorRequired: true, twoFactorToken: makeTwoFactorTicket(user) });
     }
 
+    await logAction('User Logged In', user, `Role: ${user.role}`);
     res.json({ token: makeToken(user), user });
   } catch (err) {
     console.error(err);
@@ -91,11 +101,13 @@ const createStaff = async (req, res) => {
     }
 
     const user = await UserModel.create({
-      fullName: req.body.fullName,
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
       identifier,
       password: req.body.password,
       role: req.body.role,
     });
+    await logAction('Account Created', req.user, `Created ${user.role} account for ${user.fullName}`);
 
     res.status(201).json({ user });
   } catch (err) {
@@ -115,4 +127,16 @@ const listUsers = async (req, res) => {
   }
 };
 
-module.exports = { register, login, createStaff, listUsers };
+// GET /api/check-identifier?identifier=...  (public) - lets the form say "already registered" while typing
+const checkIdentifier = async (req, res) => {
+  try {
+    const identifier = cleanIdentifier(req.query.identifier);
+    if (!identifier) return res.json({ available: true }); // wrong format is reported by the form itself
+    res.json({ available: !(await UserModel.exists({ identifier })) });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+module.exports = { register, login, createStaff, listUsers, checkIdentifier };
