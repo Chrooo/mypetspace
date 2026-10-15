@@ -1,0 +1,123 @@
+.svc-page {
+  --svc-header: 112px; /* height of the site header (72px logo + 40px padding) */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #fdf9ea;
+  color: var(--maroon);
+  /* no font-family here: it inherits the same font as the header */
+}
+.svc-page main { flex: 1; }
+
+/* spans the same width as the header; everything inside is sized in "em"
+   so boxes, photos and text grow together without changing their shape */
+.svc-wrap {
+  width: calc(100% - 12vw);
+  margin: 0 auto;
+  font-size: clamp(12px, 1.05vw, 18px);
+  /* heading height (3.25em) + its bottom margin (0.8em) = where the cards start */
+  --svc-head-total: 4.05em;
+}
+
+/* left: services + packages (same columns), right: pinned panel with its own width */
+.svc-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(280px, 24vw, 420px);
+  gap: 2em;
+  align-items: start;
+  padding: 22px 0 70px;
+}
+
+/* ---------- section heading ---------- */
+.svc-head { display: flex; align-items: center; gap: 0.6em; height: 3.25em; margin-bottom: 0.8em; }
+.svc-head-icon { font-size: 2.6em; line-height: 1; color: var(--maroon); }
+.svc-head-icon img { display: block; height: 2.8em; width: auto; }
+.svc-head h2 { margin: 0; font-size: 1.7em; font-weight: 800; line-height: 1.1; }
+.svc-head p { margin: 0.15em 0 0; font-size: 1em; font-weight: 500; line-height: 1.2; }
+
+/* ---------- cards (view only: no hover, no links) ---------- */
+.svc-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1em; }
+.svc-card {
+  padding: 0.6em 0.6em 0.9em;
+  cursor: default;
+  background: #fff;
+  border: 3px solid #d9a38f;
+  border-radius: 1.3em;
+}
+.svc-photo { width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background: #f3e3dc; border-radius: 0.8em; }
+.svc-photo img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; }
+.svc-row { display: flex; align-items: baseline; justify-content: space-between; gap: 0.5em; margin-top: 0.5em; padding: 0 0.2em; }
+.svc-row h3 { margin: 0; font-size: 1.2em; font-weight: 800; line-height: 1.15; }
+.svc-price { font-size: 1em; font-weight: 800; white-space: nowrap; }
+.svc-note { margin: 0.35em 0 0; padding: 0 0.2em; font-size: 0.9em; font-weight: 400; line-height: 1.4; }
+.svc-inc-title { margin: 0.9em 0 0.15em; padding: 0 0.2em; font-size: 0.9em; font-weight: 800; }
+.svc-inc { margin: 0; padding-left: 1.9em; font-size: 0.9em; font-weight: 400; line-height: 1.5; }
+
+/* ---------- packages follow the services, same columns and box size ---------- */
+.svc-packages { padding-top: 2.6em; }
+.svc-packages .svc-grid { align-items: stretch; }
+
+.svc-reveal { opacity: 0; transform: translateY(40px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.svc-reveal.is-visible { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .svc-reveal { opacity: 1; transform: none; transition: none; }
+}
+
+/* ---------- why choose us: pinned while you scroll ---------- */
+.svc-why {
+  position: sticky;
+  top: 30px;
+  align-self: start;
+  margin-top: var(--svc-head-total);   /* only addition: starts level with the upper boxes */
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 176px); 
+  min-height: 420px;
+  padding: 1.8em 1.6em 2em;
+  background: #cdf2ee;
+  border-radius: 1.4em;
+}
+.svc-why h2 { margin: 0 0 1em; font-size: 1.7em; font-weight: 800; }
+.svc-why ul { margin: 0 0 auto; padding: 0; list-style: none; }
+.svc-why li { display: flex; align-items: center; gap: 0.7em; margin-bottom: 0.9em; font-size: 1.05em; font-weight: 600; line-height: 1.25; }
+.svc-paw { flex: none; width: 1.7em; height: 1.7em; fill: var(--maroon); }
+.svc-why li:nth-child(even) .svc-paw { fill: var(--teal); }
+.svc-book {
+  position: relative;
+  z-index: 1;
+  align-self: flex-start;
+  margin-top: 1.2em;
+  padding: 0.9em 1.4em; 
+  font-size: 1.05em;
+  width: 72%;
+  font-weight: 600;
+  color: #fff;
+  text-decoration: none;
+  background: var(--teal-dark);
+  border-radius: 999px;
+  transition: background 0.15s;
+}
+.svc-book:hover { background: var(--teal); color: #fff; }
+.svc-why-dog {
+  position: absolute;
+  right: -10em;          /* unchanged */
+  bottom: -2.8em;       /* unchanged */
+  z-index: 2;
+  width: 27em;          /* new: sized in em so it scales with the page like everything else */
+  max-width: none;      /* removes the old 20em cap */
+  height: auto;
+  pointer-events: none;
+}
+
+/* ---------- small screens ---------- */
+@media (max-width: 960px) {
+  .svc-layout { grid-template-columns: 1fr; }
+  .svc-why { position: relative; top: 0; margin-top: 0; height: auto; min-height: 0; padding-bottom: 7em; }
+}
+@media (max-width: 640px) {
+  .svc-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 420px) {
+  .svc-grid { grid-template-columns: 1fr; }
+}
