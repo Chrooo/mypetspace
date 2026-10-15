@@ -10,7 +10,6 @@ const LINKS = [
   { label: 'About', to: '/about' },
   { label: 'Services', to: '/services' },
   { label: 'Rooms', to: '/rooms' },
-  { label: 'Groomers', to: '/groomers' },
 ];
 
 // top bar shared by the landing page and every public page
@@ -39,9 +38,10 @@ function SiteHeader() {
       </nav>
 
       <div className="site-actions">
-        <button type="button" className="icon-btn" aria-label="Search" title="Search (coming soon)">
+        <label className="site-search">
+          <input type="search" aria-label="Search" />
           <SearchOutlined />
-        </button>
+        </label>
         {user ? (
           <>
             <Link to="/dashboard" className="btn btn-outline-teal">Dashboard</Link>

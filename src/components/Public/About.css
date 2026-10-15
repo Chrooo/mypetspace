@@ -1,0 +1,110 @@
+.about-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #fdf9ea;
+  color: var(--maroon);
+  font-family: 'Nunito', system-ui, sans-serif;
+}
+.about-page main { flex: 1; }
+
+/* same width as the header (6vw margin on each side) */
+.about-intro { width: calc(100% - 12vw); margin: 0 auto; padding: 22px 0 22px; }
+.about-intro h1 { margin: 0 0 8px; font-size: 30px; font-weight: 700; }
+.about-intro p { margin: 0; font-size: 16px; line-height: 1.5; text-align: justify; }
+
+.about-section-head { text-align: center; margin-bottom: 18px; }
+.about-section-head h2 {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 6px;
+  font-size: 26px;
+  font-weight: 700;
+}
+.about-section-head p { margin: 0; font-size: 15px; font-weight: 700; color: #6b5a5a; }
+.about-paw { width: 22px; height: 22px; fill: #1b1b1b; }
+.about-paw:last-child { transform: scaleX(-1); }
+
+/* ---------- facilities (view only: hover effects, no links) ---------- */
+.about-facilities { padding: 8px 6vw 32px; }
+.facility-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 18px;
+  margin: 0 auto;
+}
+.facility-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 160px;
+  color: #fff;
+  cursor: default;
+  border-radius: 24px;
+  box-shadow: 0 8px 18px rgba(107, 30, 43, 0.15);
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+.facility-card:hover { transform: translateY(-6px) scale(1.02); box-shadow: 0 16px 28px rgba(107, 30, 43, 0.22); }
+.facility-card .anticon { font-size: 66px; transition: transform 0.25s; }
+.facility-card:hover .anticon { transform: scale(1.12) rotate(-4deg); }
+.facility-card span:not(.anticon) { font-size: 15px; font-weight: 700; }
+.facility-card.teal { background: var(--teal); }
+.facility-card.pink { background: var(--pink); }
+
+/* ---------- offers (view only) ---------- */
+.about-offers { padding: 26px 6vw 40px; background: #fffdf2; box-shadow: 0 -8px 20px rgba(107, 30, 43, 0.05); }
+.offer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 18px;
+  margin: 0 auto;
+}
+.offer-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 210px;
+  padding: 12px 12px 18px;
+  color: var(--maroon);
+  cursor: default;
+  background: #fffdf2;
+  border: 3px solid;
+  border-radius: 24px;
+  transition: transform 0.25s, box-shadow 0.25s, background 0.25s;
+}
+.offer-card:hover { transform: translateY(-6px); background: #fff; box-shadow: 0 14px 26px rgba(107, 30, 43, 0.14); }
+.offer-card.teal { border-color: var(--teal); --tone: var(--teal); --tone-soft: #cfe9ea; }
+.offer-card.pink { border-color: var(--pink); --tone: var(--pink); --tone-soft: #fbd0e2; }
+
+/* every photo gets the exact same box (4:3) and is cropped to fit, whatever size the file is */
+.offer-photo {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--tone-soft);
+  border-radius: 14px;
+}
+
+.offer-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+.offer-badge {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  margin: -18px 0 0 10px;
+  font-size: 18px;
+  color: var(--tone);
+  background: #fff;
+  border: 2px solid var(--tone);
+  border-radius: 50%;
+}
+.offer-label { margin-top: 10px; font-size: 15px; font-weight: 700; line-height: 1.3; }

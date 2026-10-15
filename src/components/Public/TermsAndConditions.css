@@ -1,0 +1,63 @@
+.terms-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #fdf9ea;
+  color: var(--maroon);
+}
+.terms-page main { flex: 1; }
+
+/* same width as the header (6vw margin on each side) */
+.terms-wrap {
+  width: calc(100% - 12vw);
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 28px 0 70px;
+}
+
+.terms-wrap h1 { margin: 0 0 6px; font-size: clamp(28px, 3vw, 40px); font-weight: 800; }
+.terms-updated { margin: 0 0 14px; font-size: 14px; font-weight: 700; color: var(--teal-dark); }
+.terms-intro { margin: 0 0 24px; font-size: 16px; line-height: 1.6; }
+
+/* one white card, same look as the room and service cards */
+.terms-card {
+  padding: 12px 28px 20px;
+  background: #fff;
+  border: 3px solid #d9a38f;
+  border-radius: 22px;
+}
+
+.terms-section { padding: 18px 0; border-bottom: 1px solid #f0dcd3; }
+.terms-section:last-child { border-bottom: 0; }
+
+.terms-section h2 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.terms-num {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  font-size: 15px;
+  font-weight: 800;
+  color: #fff;
+  background: var(--pink);
+  border-radius: 50%;
+}
+.terms-section:nth-child(even) .terms-num { background: var(--teal); }
+
+.terms-section p { margin: 0 0 8px; padding-left: 42px; font-size: 15px; line-height: 1.65; }
+.terms-section p:last-child { margin-bottom: 0; }
+
+@media (max-width: 640px) {
+  .terms-card { padding: 6px 18px 14px; }
+  .terms-section h2 { font-size: 18px; }
+  .terms-section p { padding-left: 0; }
+}

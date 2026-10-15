@@ -7,13 +7,10 @@ import DashboardRedirect from './components/Dashboard/DashboardRedirect';
 
 // public pages
 import AboutUs from './components/Public/AboutUs';
-import OurFacilities from './components/Public/OurFacilities';
-import ExploreOffers from './components/Public/ExploreOffers';
 import Services from './components/Public/Services';
-import GroomingServices from './components/Public/GroomingServices';
-import GroomingPackages from './components/Public/GroomingPackages';
 import Rooms from './components/Public/Rooms';
-import Groomers from './components/Public/Groomers';
+import TermsAndConditions from './components/Public/TermsAndConditions';
+
 
 // security (two-factor authentication)
 import Security from './components/Security/Security';
@@ -68,13 +65,9 @@ function App() {
       <Route path="/signup" element={<AuthPage mode="signup" />} />
 
       <Route path="/about" element={<AboutUs />} />
-      <Route path="/about/facilities" element={<OurFacilities />} />
-      <Route path="/about/offers" element={<ExploreOffers />} />
       <Route path="/services" element={<Services />} />
-      <Route path="/services/grooming" element={<GroomingServices />} />
-      <Route path="/services/packages" element={<GroomingPackages />} />
+      <Route path="/terms" element={<TermsAndConditions />} />
       <Route path="/rooms" element={<Rooms />} />
-      <Route path="/groomers" element={<Groomers />} />
 
       {/* ---------- any logged-in user: sends each role to its own dashboard ---------- */}
       <Route path="/dashboard" element={<ProtectedRoute><DashboardRedirect /></ProtectedRoute>} />

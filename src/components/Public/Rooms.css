@@ -1,0 +1,53 @@
+/* Rooms page: builds on Services.css, only the differences live here */
+
+/* ---------- spacing between the rate categories ---------- */
+/* card size is untouched; this only adds room above each heading */
+.rooms-page .rooms-section { padding-top: 0; }
+.rooms-page .rooms-section + .rooms-section { padding-top: 3.4em; }
+
+/* house icon is black in the design */
+.rooms-page .svc-head-icon { color: #000; }
+
+/* room descriptions are justified in the design */
+.rooms-page .svc-note { text-align: justify; }
+
+/* the bold second line on the best-seller cards ("5 consecutive stay") */
+.rooms-page .rooms-sub {
+  margin: 0.35em 0 0;
+  padding: 0 0.2em;
+  font-size: 1.2em;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+/* ---------- pink amenities panel ---------- */
+.rooms-page .svc-why.rooms-amenities { background: #f8b9cc; }   /* panel background */
+
+.rooms-page .rooms-amenities li:nth-child(even) .svc-paw { fill: #ed1b71; }
+
+.rooms-page .rooms-amenities .svc-book {
+  background: #ed1b71;
+  color: #fff;
+  width: 72%;              /* wider button; raise or lower to taste */
+  box-sizing: border-box;
+  text-align: center;
+  padding: 0.9em 1.4em;    /* slightly taller */
+}
+.rooms-page .rooms-amenities .svc-book:hover {
+  background: #f58cb5;   /* light pink */
+  color: #fff;           /* text stays white */
+  filter: none;
+}
+
+/* the cat sits on the bottom-right corner of the panel */
+.rooms-page .rooms-amenities .svc-why-dog {
+  right: -5em;
+  bottom: -1.5em;
+  width: 380px;
+  max-width: 17em;
+}
+
+@media (max-width: 960px) {
+  .rooms-page .rooms-section + .rooms-section { padding-top: 2.4em; }
+  .rooms-page .rooms-amenities .svc-why-dog { right: 0; bottom: 0; }
+}
