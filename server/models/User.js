@@ -3,7 +3,8 @@ const bcrypt = require('bcryptjs');
 
 const UserSchema = new mongoose.Schema(
   {
-    fullName: { type: String, required: true, trim: true },
+    firstName: { type: String, required: true, trim: true },
+    lastName: { type: String, required: true, trim: true },
     identifier: { type: String, required: true, unique: true }, // email OR phone number
     password: { type: String, required: true, select: false },
 
@@ -32,13 +33,20 @@ UserSchema.methods.comparePassword = function (plain) {
 };
 
 // never send the password or the 2FA secrets back to the browser
+// fullName is not stored: it is firstName + lastName
+UserSchema.virtual('fullName').get(function () {
+  return `${this.firstName} ${this.lastName}`;
+});
+
 UserSchema.set('toJSON', {
+  virtuals: true,
   transform: (doc, ret) => {
     delete ret.password;
     delete ret.twoFactorSecret;
     delete ret.twoFactorLastStep;
     delete ret.twoFactorRecoveryCodes;
     delete ret.__v;
+    delete ret.id;
     return ret;
   },
 });

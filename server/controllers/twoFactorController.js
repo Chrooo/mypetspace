@@ -1,3 +1,4 @@
+const { logAction } = require('../utils/audit');
 const QRCode = require('qrcode');
 const UserModel = require('../models/User');
 const { makeToken, readTwoFactorTicket } = require('../utils/tokens');
@@ -36,6 +37,7 @@ const loginSecondStep = async (req, res) => {
     }
 
     tf.clearFailures(user._id);
+    await logAction('User Logged In', user, `Role: ${user.role} (two-factor)`);   
     res.json({ token: makeToken(user), user });
   } catch (err) {
     console.error(err);

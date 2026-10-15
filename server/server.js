@@ -27,7 +27,7 @@ mongoose
       console.log('Admin NOT created: ADMIN_IDENTIFIER or ADMIN_PASSWORD is missing in server/.env');
     } else {
       await UserModel.create({
-        fullName: process.env.ADMIN_NAME || 'Admin',
+        firstName: process.env.ADMIN_FIRST_NAME || 'Admin', lastName: process.env.ADMIN_LAST_NAME || 'User',
         identifier: process.env.ADMIN_IDENTIFIER.toLowerCase(),
         password: process.env.ADMIN_PASSWORD,
         role: 'admin',

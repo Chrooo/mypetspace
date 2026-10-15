@@ -30,6 +30,19 @@ export const logout = () => {
   setHeader(null);
 };
 
+  export const checkAvailable = async (_, value) => {
+    const v = (value || '').trim();
+    if (!v) return;
+    let available = true;
+    try {
+      const { data } = await axios.get(`${API_URL}/check-identifier`, { params: { identifier: v } });
+      available = data.available;
+    } catch (err) {
+      return;
+    }
+    if (!available) throw new Error('This email or phone is already registered');
+  };
+
 // where each role lands after logging in (/dashboard redirects here)
 export const roleHome = (role) =>
   ({ admin: '/admin', staff: '/staff', groomer: '/groomer', customer: '/account' }[role] || '/account');
