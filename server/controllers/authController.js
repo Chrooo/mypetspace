@@ -1,5 +1,5 @@
-const jwt = require('jsonwebtoken');
 const UserModel = require('../models/User');
+const { makeToken, makeTwoFactorTicket } = require('../utils/tokens');
 
 /* ---------- helpers ---------- */
 
@@ -22,9 +22,6 @@ const validate = ({ fullName, identifier, password }) => {
   }
   return null;
 };
-
-const makeToken = (user) =>
-  jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
 /* ---------- controllers ---------- */
 
@@ -65,6 +62,11 @@ const login = async (req, res) => {
     const user = await UserModel.findOne({ identifier }).select('+password');
     if (!user || !(await user.comparePassword(req.body.password))) {
       return res.status(401).json({ message: 'Incorrect email/phone or password.' });
+    }
+
+    // two-factor is on: do not give the login token yet, ask for the code first (POST /api/login/2fa)
+    if (user.twoFactorEnabled) {
+      return res.json({ twoFactorRequired: true, twoFactorToken: makeTwoFactorTicket(user) });
     }
 
     res.json({ token: makeToken(user), user });

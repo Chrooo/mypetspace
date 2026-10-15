@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Button, Tag } from 'antd';
-import { LogoutOutlined } from '@ant-design/icons';
+import { LogoutOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
 import { getUser, logout, roleHome, ROLE_LABELS } from '../../auth';
 import logo from '../../assets/logo.png';
 import Planned from './Planned';
@@ -30,6 +30,7 @@ function DashboardShell({ title, subtitle, back, stats = [], items = [], planned
         <div className="dash-user">
           <span>{user.fullName}</span>
           <Tag color={role.color} style={{ fontWeight: 700 }}>{role.label}</Tag>
+          <Button icon={<SafetyCertificateOutlined />} onClick={() => navigate('/security')}>Security</Button>
           <Button icon={<LogoutOutlined />} onClick={handleLogout}>Log out</Button>
         </div>
       </header>
