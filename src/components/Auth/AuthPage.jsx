@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Alert, Button, Divider, Form, Input, Tooltip } from 'antd';
 import { FacebookFilled, GoogleOutlined, LockOutlined, MailOutlined, SafetyCertificateOutlined, UserOutlined } from '@ant-design/icons';
-import { API_URL, getUser, saveLogin } from '../../auth';
+import { API_URL, checkAvailable, getUser, saveLogin } from '../../auth';
 import logo from '../../assets/logo.png';
 import './AuthPage.css';
 
@@ -16,6 +16,13 @@ const checkIdentifier = (_, value) => {
   if (!v || EMAIL_RE.test(v) || PHONE_RE.test(v.replace(/[\s-]/g, ''))) return Promise.resolve();
   return Promise.reject(new Error('Enter a valid email or a mobile number like 09123456789'));
 };
+
+// first / last name: letters, spaces, apostrophes, periods and hyphens
+const nameRules = (label) => [
+  { required: true, whitespace: true, message: `Enter your ${label}` },
+  { pattern: /^[A-Za-z\u00C0-\u024F][A-Za-z\u00C0-\u024F .'-]*$/, message: 'Letters only, please' },
+  { max: 50, message: 'Maximum of 50 characters' },
+];
 
 const COPY = {
   login: {
@@ -163,22 +170,34 @@ function AuthPage({ mode }) {
               </>
             ) : (
               <>
-            <Form layout="vertical" requiredMark={false} onFinish={onFinish} size="large">
+            <Form layout="vertical" requiredMark={false} onFinish={onFinish} size="large" validateDebounce={400}>
               {isSignup && (
-                <Form.Item name="fullName" rules={[{ required: true, message: 'Enter your full name' }]}>
-                  <Input prefix={<UserOutlined />} placeholder="Full name" autoComplete="name" />
-                </Form.Item>
+                <div style={{ display: 'flex', gap: 12 }}>
+                  <Form.Item name="firstName" rules={nameRules('first name')} hasFeedback style={{ flex: 1 }}>
+                    <Input prefix={<UserOutlined />} placeholder="First name" autoComplete="given-name" />
+                  </Form.Item>
+                  <Form.Item name="lastName" rules={nameRules('last name')} hasFeedback style={{ flex: 1 }}>
+                    <Input placeholder="Last name" autoComplete="family-name" />
+                  </Form.Item>
+                </div>
               )}
 
               <Form.Item
                 name="identifier"
-                rules={[{ required: true, message: 'Enter your email or phone number' }, { validator: checkIdentifier }]}
+                validateFirst
+                hasFeedback={isSignup}
+                rules={[
+                  { required: true, message: 'Enter your email or phone number' },
+                  { validator: checkIdentifier },
+                  ...(isSignup ? [{ validator: checkAvailable }] : []),
+                ]}
               >
                 <Input prefix={<MailOutlined />} placeholder="Email or phone" autoComplete="username" />
               </Form.Item>
 
               <Form.Item
                 name="password"
+                hasFeedback={isSignup}
                 rules={[
                   { required: true, message: 'Enter your password' },
                   ...(isSignup
