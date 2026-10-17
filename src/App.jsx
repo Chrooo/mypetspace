@@ -24,6 +24,7 @@ import SelectSchedule from './components/Booking/SelectSchedule';
 import Confirmation from './components/Booking/Confirmation';
 import Payment from './components/Booking/Payment';
 import Receipt from './components/Receipt/Receipt';
+import SelectSlot from './components/Booking/SelectSlot';
 
 // Fur Parent (customer)
 import CustomerDashboard from './components/Customer/CustomerDashboard';
@@ -89,6 +90,7 @@ function App() {
         <Route path="/book/:type/services" element={<SelectServices />} />
         <Route path="/book/:type/additional-services" element={<AdditionalServices />} />
         <Route path="/book/:type/schedule" element={<SelectSchedule />} />
+        <Route path="/book/:type/slot" element={<SelectSlot />} />
         <Route path="/book/:type/confirmation" element={<Confirmation />} />
         <Route path="/book/:type/payment" element={<Payment />} />
         <Route path="/receipts/:id" element={<Receipt />} />

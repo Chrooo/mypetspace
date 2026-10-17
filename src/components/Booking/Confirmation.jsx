@@ -6,6 +6,7 @@ import { Alert, Modal, Spin } from 'antd';
 import { API_URL } from '../../auth';
 import BookingStep from './BookingStep';
 import './Booking.css';
+import { findRoom, hourLabel, stayTotal } from '../../data/roomOptions';
 
 // What the earlier steps remembered:
 //   booking:<type>:pet       -> chosen pet's _id
@@ -234,11 +235,187 @@ function GroomingConfirmation({ type }) {
   );
 }
 
+// ---------- room booking ----------
+// What the earlier steps remembered: pet, room, dates, time, hours (Day Boarding), slot
+const ROOM_NAMES = ['pet', 'room', 'dates', 'time', 'hours', 'slot'];
+const clearRoomBooking = (type) => {
+  try {
+    ROOM_NAMES.forEach((n) => sessionStorage.removeItem(key(type, n)));
+  } catch (err) {
+    /* ignore */
+  }
+};
+
+function RoomConfirmation({ type }) {
+  const navigate = useNavigate();
+
+  // read once, so clearing the saved choices after booking doesn't redirect this page
+  const [draft] = useState(() => {
+    const dates = readJson(key(type, 'dates'));
+    return {
+      petId: readSaved(key(type, 'pet')),
+      room: findRoom(readSaved(key(type, 'room'))),
+      dates: dates && dates.start && dates.end ? dates : null,
+      time: readSaved(key(type, 'time')),
+      hours: Number(readSaved(key(type, 'hours'))) || null,
+      slot: Number(readSaved(key(type, 'slot'))) || null,
+    };
+  });
+
+  const [pet, setPet] = useState(null);
+  const [petError, setPetError] = useState('');
+  const [agreed, setAgreed] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+  const [slotError, setSlotError] = useState(''); // the slot was taken while the customer was confirming
+  const [booked, setBooked] = useState(false);
+
+  const complete = !!draft.petId && !!draft.room && !!draft.dates && !!draft.time && !!draft.slot;
+
+  useEffect(() => {
+    if (!complete) return undefined;
+    let active = true;
+    axios
+      .get(`${API_URL}/pets`)
+      .then(({ data }) => {
+        if (!active) return;
+        const found = data.pets.find((p) => p._id === draft.petId);
+        if (found) setPet(found);
+        else setPetError('We could not find that pet. Please choose your pet again.');
+      })
+      .catch((err) => {
+        if (active) setPetError(err.response?.data?.message || 'Could not load your pet. Please try again.');
+      });
+    return () => {
+      active = false;
+    };
+  }, [complete, draft.petId]);
+
+  // the earlier steps must be done first
+  if (!draft.petId) return <Navigate to={`/book/${type}/pet-details`} replace />;
+  if (!draft.room || !draft.dates) return <Navigate to={`/book/${type}/services`} replace />;
+  if (!draft.time || !draft.slot) return <Navigate to={`/book/${type}/slot`} replace />;
+
+  const { room, dates } = draft;
+  const isDay = room.kind === 'day';
+  const nights = dayjs(dates.end).diff(dayjs(dates.start), 'day');
+  const total = stayTotal(room, nights, draft.hours);
+  const startHour = Number(draft.time.slice(0, 2));
+  const dateText = isDay
+    ? dayjs(dates.start).format('MMMM D, YYYY')
+    : `${dayjs(dates.start).format('MMMM D')} - ${dayjs(dates.end).format('MMMM D, YYYY')} (${nights} ${nights === 1 ? 'night' : 'nights'})`;
+  const timeText = isDay
+    ? `${hourLabel(startHour)} - ${hourLabel(startHour + draft.hours)} (${draft.hours} hours)`
+    : `Check-in ${hourLabel(startHour)}`;
+
+  const onConfirm = async () => {
+    setSubmitting(true);
+    setSubmitError('');
+    try {
+      await axios.post(`${API_URL}/rooms/reservations`, {
+        petId: draft.petId,
+        roomId: room.id,
+        slot: draft.slot,
+        start: dates.start,
+        end: dates.end,
+        time: draft.time,
+        hours: isDay ? draft.hours : undefined,
+      });
+      clearRoomBooking(type);
+      setBooked(true);
+    } catch (err) {
+      const message = err.response?.data?.message || 'Could not reach the server. Please try again.';
+      if (err.response?.status === 409) setSlotError(message);
+      else setSubmitError(message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const rows = [
+    ['Pet', pet ? `${pet.name} (${pet.breed})` : '...'],
+    ['Room', room.name],
+    ['Slot', `Slot ${draft.slot}`],
+    ['Date', dateText],
+    ['Time', timeText],
+    ['Total', total === null ? 'Surcharge: confirmed by the shop' : `₱${total.toLocaleString()}`],
+  ];
+
+  return (
+    <BookingStep
+      step="confirmation"
+      title="Book a Room"
+      subtitle="Choose the perfect room for your fur babies."
+      customNext={
+        <button type="button" className="btn cf-confirm" disabled={!pet || !agreed || submitting || !!slotError} onClick={onConfirm}>
+          {submitting ? 'Confirming...' : 'Confirm'}
+        </button>
+      }
+    >
+      {petError && <Alert type="error" showIcon title={petError} className="cf-alert" action={<Link to={`/book/${type}/pet-details`}>Choose a pet</Link>} />}
+      {slotError && <Alert type="error" showIcon title={slotError} className="cf-alert" action={<Link to={`/book/${type}/slot`}>Choose another slot</Link>} />}
+      {submitError && <Alert type="error" showIcon title={submitError} className="cf-alert" />}
+
+      <section className="cf-card">
+        <div className="cf-left">
+          <h2 className="cf-title">Booking Summary</h2>
+          <dl className="cf-rows">
+            {rows.map(([label, value]) => (
+              <div key={label} className="cf-row">
+                <dt>{label}</dt>
+                <dd>{value}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+
+        <div className="cf-right">
+          {pet ? (
+            <>
+              <div className="cf-photo">{pet.photo ? <img src={pet.photo} alt={pet.name} /> : <PawIcon />}</div>
+              <h3 className="cf-pet-name">{pet.name}</h3>
+              <p className="cf-pet-breed">{pet.breed}</p>
+            </>
+          ) : (
+            !petError && <div className="cf-loading"><Spin /></div>
+          )}
+        </div>
+      </section>
+
+      <label className="cf-check">
+        <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} />
+        <span>I confirm that the booking details are correct.</span>
+      </label>
+
+      <Modal
+        open={booked}
+        centered
+        closable={false}
+        maskClosable={false}
+        keyboard={false}
+        title="Booking Confirmed"
+        footer={
+          <div className="cf-modal-actions">
+            <button type="button" className="btn btn-outline-teal" onClick={() => navigate('/')}>Back to Home</button>
+            <button type="button" className="btn btn-pink" onClick={() => navigate(`/book/${type}/pet-details`)}>Book Another</button>
+          </div>
+        }
+      >
+        <p className="cf-modal-text">
+          {pet ? `${pet.name}'s` : 'Your'} stay in {room.name} (slot {draft.slot}) on {dateText} has been booked.
+          Would you like to book another room?
+        </p>
+      </Modal>
+    </BookingStep>
+  );
+}
+
 function Confirmation() {
   const { type } = useParams();
 
-  // grooming gets the real page; the hotel booking summary stays a placeholder until it is built
+  // grooming and room bookings both have a real page now
   if (type === 'grooming') return <GroomingConfirmation type={type} />;
+  if (type === 'room') return <RoomConfirmation type={type} />;
 
   return (
     <BookingStep
@@ -254,3 +431,4 @@ function Confirmation() {
 }
 
 export default Confirmation;
+

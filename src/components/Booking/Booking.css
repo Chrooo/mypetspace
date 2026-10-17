@@ -259,3 +259,187 @@
   .cf-right { padding-top: 24px; border-left: 0; border-top: 3px solid #111; }
   .cf-row { grid-template-columns: 90px 1fr; }
 }
+
+/* ---------- Room Type (Book a Room, step 2) ---------- */
+.rt-panel {
+  padding: 34px 28px 22px;
+  background: #fff;
+  border-radius: 34px;
+}
+
+/* Filter / Price / dates: three outlined pills in a row */
+.rt-tools { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px 22px; margin-bottom: 28px; }
+.rt-pill.ant-select,
+.rt-pill.ant-picker { width: 190px; height: 34px; }
+.rt-pill.ant-picker.rt-dates { width: 300px; }
+.rt-pill.ant-select .ant-select-selector,
+.rt-pill.ant-picker {
+  min-height: 34px;
+  padding-inline: 16px;
+  color: var(--maroon);
+  background: #fff;
+  border: 1.5px solid var(--maroon);
+  border-radius: 999px;
+  box-shadow: none;
+}
+.rt-pill.ant-select .ant-select-selector { align-items: center; padding-inline: 14px; }
+.rt-pill .ant-select-selection-placeholder,
+.rt-pill input::placeholder { color: var(--maroon); opacity: 1; }
+.rt-pill.ant-select .ant-select-suffix,
+.rt-pill.ant-picker .ant-picker-suffix { color: var(--maroon); }
+.rt-pill.ant-picker input { color: var(--maroon); font-weight: 700; }
+
+/* arrows on both sides of the row of cards */
+.rt-carousel { display: flex; align-items: center; gap: 10px; }
+.rt-arrow {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  font-size: 18px;
+  color: #8f98a3;
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.rt-arrow:hover:not(:disabled) { color: var(--pink); background: #fdf3f5; }
+.rt-arrow:disabled { opacity: 0.3; cursor: default; }
+.rt-arrow:focus-visible { outline: 3px solid var(--teal); outline-offset: 2px; }
+
+.rt-track {
+  display: flex;
+  flex: 1;
+  gap: 14px;
+  min-width: 0;
+  padding: 6px 4px 10px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+.rt-track::-webkit-scrollbar { display: none; }
+
+/* one light-blue room card: photo + name on top, price underneath */
+.rt-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex: 0 0 calc((100% - 42px) / 4);   /* four cards in view */
+  min-height: 190px;
+  padding: 16px 14px 14px;
+  font: inherit;
+  text-align: left;
+  color: var(--maroon);
+  background: #c5ddfb;
+  border: 3px solid transparent;
+  border-radius: 28px;
+  cursor: pointer;
+  scroll-snap-align: start;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+}
+.rt-card:hover { border-color: var(--pink); transform: translateY(-2px); }
+.rt-card.is-on { border-color: var(--pink); box-shadow: 0 0 0 3px #fdd3df; }
+.rt-card:focus-visible { outline: 3px solid var(--teal); outline-offset: 2px; }
+
+.rt-top { display: flex; align-items: center; gap: 12px; }
+.rt-top img { flex: none; width: 88px; height: 72px; object-fit: cover; border-radius: 14px; }
+.rt-name { font-size: 18px; font-weight: 800; line-height: 1.3; }
+.rt-name small { display: block; font-size: 12px; font-weight: 600; }
+.rt-price { font-size: 13px; line-height: 1.45; text-align: justify; }
+
+.rt-empty { margin: 0; padding: 40px 0; width: 100%; text-align: center; font-weight: 700; }
+.rt-foot { min-height: 22px; margin: 6px 0 0; text-align: center; font-size: 14px; }
+
+@media (max-width: 1100px) { .rt-card { flex-basis: calc((100% - 28px) / 3); } }
+@media (max-width: 860px) {
+  .rt-panel { padding: 24px 12px 18px; border-radius: 24px; }
+  .rt-card { flex-basis: calc((100% - 14px) / 2); }
+  .rt-pill.ant-select,
+  .rt-pill.ant-picker,
+  .rt-pill.ant-picker.rt-dates { width: 100%; }
+}
+@media (max-width: 560px) { .rt-card { flex-basis: 85%; } .rt-arrow { display: none; } }
+
+/* ---------- Room Type: pets max, slots left, full rooms ---------- */
+.rt-max { font-size: 14px; font-weight: 700; }
+.rt-left { font-size: 12px; font-weight: 700; color: var(--teal-dark); }
+.rt-badge {
+  align-self: flex-start;
+  padding: 3px 12px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #fff;
+  background: #8f98a3;
+  border-radius: 999px;
+}
+.rt-card.is-full { background: #e3e7ec; color: #6b7480; cursor: not-allowed; }
+.rt-card.is-full:hover { border-color: transparent; transform: none; }
+.rt-card.is-full img { filter: grayscale(1); opacity: 0.7; }
+
+/* ---------- Select Slot (Book a Room, step 3) ---------- */
+.sl-panel { max-width: 900px; }
+.sl-head { display: flex; align-items: center; gap: 16px; margin-bottom: 22px; }
+.sl-head img { width: 96px; height: 76px; object-fit: cover; border-radius: 14px; }
+.sl-head h2 { margin: 0; font-size: 24px; font-weight: 800; }
+.sl-head p { margin: 2px 0 0; font-size: 14px; }
+.sl-title { margin: 20px 0 10px; font-size: 18px; font-weight: 800; color: var(--maroon); }
+
+/* check-in / start time pills */
+.sl-times { display: flex; flex-wrap: wrap; gap: 10px; }
+.sl-time {
+  min-width: 92px;
+  height: 34px;
+  padding: 0 14px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--maroon);
+  background: #fff;
+  border: 2px solid var(--maroon);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.sl-time:hover:not(:disabled) { background: #fdf3f5; }
+.sl-time.is-on { color: #fff; background: var(--pink); border-color: var(--pink); }
+.sl-time:disabled { color: #8f98a3; background: #e3e7ec; border-color: #e3e7ec; text-decoration: line-through; cursor: not-allowed; }
+.sl-time:focus-visible { outline: 3px solid var(--teal); outline-offset: 2px; }
+
+.sl-hours { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 16px; font-weight: 700; }
+.sl-select { width: 130px; }
+.sl-warn { color: #c0392b; }
+
+/* the slot squares */
+.sl-grid { display: flex; flex-wrap: wrap; gap: 14px; }
+.sl-square {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 96px;
+  height: 96px;
+  font: inherit;
+  color: var(--maroon);
+  background: #c5ddfb;
+  border: 3px solid transparent;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.15s;
+}
+.sl-square b { font-size: 30px; line-height: 1; }
+.sl-square span { font-size: 12px; font-weight: 700; }
+.sl-square:hover:not(:disabled) { border-color: var(--pink); transform: translateY(-2px); }
+.sl-square.is-on { color: #fff; background: var(--pink); border-color: var(--pink); }
+.sl-square.is-taken { color: #8f98a3; background: #e3e7ec; cursor: not-allowed; }
+.sl-square.is-taken b { text-decoration: line-through; }
+.sl-square:focus-visible { outline: 3px solid var(--teal); outline-offset: 2px; }
+
+.sl-hint, .sl-legend { margin: 8px 0 0; font-size: 14px; }
+.sl-wait { display: grid; place-items: center; min-height: 100px; }
+
+@media (max-width: 560px) {
+  .sl-square { width: 76px; height: 76px; }
+  .sl-square b { font-size: 24px; }
+}
