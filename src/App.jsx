@@ -48,7 +48,7 @@ import AdminRegister from './components/Admin/AdminRegister';
 import StaffDashboard from './components/Staff/StaffDashboard';
 import ManageReservations from './components/Manage/ManageReservations';
 import ManageRooms from './components/Manage/ManageRooms';
-import ManageAppointments from './components/Manage/ManageAppointments';
+import ManageBookings from './components/Manage/ManageBookings';
 import ManageServices from './components/Manage/ManageServices';
 import ManageGroomers from './components/Manage/ManageGroomers';
 import ManagePayments from './components/Manage/ManagePayments';
@@ -126,7 +126,9 @@ function App() {
       <Route element={guard(['admin', 'staff'])}>
         <Route path="/manage/reservations" element={<ManageReservations />} />
         <Route path="/manage/rooms" element={<ManageRooms />} />
-        <Route path="/manage/appointments" element={<ManageAppointments />} />
+        {/* appointments and bookings are one page now */}
+        <Route path="/manage/appointments" element={<Navigate to="/manage/bookings" replace />} />
+        <Route path="/manage/bookings" element={<ManageBookings />} />
         <Route path="/manage/services" element={<ManageServices />} />
         <Route path="/manage/groomers" element={<ManageGroomers />} />
         <Route path="/manage/payments" element={<ManagePayments />} />
