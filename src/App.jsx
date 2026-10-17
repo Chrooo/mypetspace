@@ -37,8 +37,8 @@ import MyBookings from './components/Customer/MyBookings';;
 // groomer
 import GroomerDashboard from './components/Groomer/GroomerDashboard';
 import GroomerProfile from './components/Groomer/GroomerProfile';
-import GroomerAvailability from './components/Groomer/GroomerAvailability';
-import AssignedServices from './components/Groomer/AssignedServices';
+import GroomerAppointments from './components/Groomer/GroomerAppointments';
+import GroomerServices from './components/Groomer/GroomerServices';
 
 // admin, staff and the pages they share
 import AdminDashboard from './components/Admin/AdminDashboard';
@@ -108,8 +108,8 @@ function App() {
       <Route element={guard(['groomer'])}>
         <Route path="/groomer" element={<GroomerDashboard />} />
         <Route path="/groomer/profile" element={<GroomerProfile />} />
-        <Route path="/groomer/availability" element={<GroomerAvailability />} />
-        <Route path="/groomer/assignments" element={<AssignedServices />} />
+        <Route path="/groomer/appointments" element={<GroomerAppointments />} />
+        <Route path="/groomer/services" element={<GroomerServices />} />
       </Route>
 
       {/* ---------- admin and staff ---------- */}

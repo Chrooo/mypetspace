@@ -13,6 +13,7 @@ const UserSchema = new mongoose.Schema(
     twoFactorSecret: { type: String, select: false }, // the key shared with the authenticator app
     twoFactorLastStep: { type: Number, default: 0, select: false }, // newest 30-second step already used, so a code can't be used twice
     twoFactorRecoveryCodes: { type: [String], select: false }, // hashed one-time recovery codes
+    avatar: { type: String, default: '' }, // profile photo as a small data URL (resized by the browser)
     role: {
       type: String,
       enum: ['admin', 'staff', 'groomer', 'customer'],

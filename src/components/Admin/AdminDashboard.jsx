@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
-import { BookFilled, DollarCircleFilled, FileAddFilled, LogoutOutlined, TeamOutlined } from '@ant-design/icons';
+import { BookFilled, DollarCircleFilled, FileAddFilled, LogoutOutlined, SafetyCertificateOutlined, TeamOutlined } from '@ant-design/icons';
 import AdminLayout from './AdminLayout';
 import { API_URL, getUser, logout } from '../../auth';
 
@@ -40,6 +40,7 @@ function AdminDashboard() {
 
   return (
     <AdminLayout>
+      <div className="adm-dash">
       <h1 className="adm-welcome">Welcome, {user?.firstName || 'Admin'}!</h1>
       <p className="adm-welcome-sub">This is the Admin Dashboard</p>
 
@@ -82,15 +83,22 @@ function AdminDashboard() {
         </section>
       )}
 
-      <button
-        className="adm-logout"
-        onClick={() => {
-          logout();
-          navigate('/');
-        }}
-      >
-        Logout <LogoutOutlined />
-      </button>
+      <div className="adm-footer">
+        <button type="button" className="adm-link" onClick={() => navigate('/security')}>
+          <SafetyCertificateOutlined /> Security
+        </button>
+        <button
+          type="button"
+          className="adm-link adm-logout"
+          onClick={() => {
+            logout();
+            navigate('/');
+          }}
+        >
+          Logout <LogoutOutlined />
+        </button>
+      </div>
+      </div>
     </AdminLayout>
   );
 }

@@ -1,0 +1,143 @@
+/* Groomer dashboard pages (everything is prefixed "gr-" so other dashboards are not affected) */
+.gr {
+  --gr-tan: #c68e76;
+  --gr-brown: #6b3624;
+  --gr-maroon: #46141f;
+  --gr-mid: #764650;
+  --gr-cream: #fcf8ea;
+  min-height: 100vh;
+  background: var(--gr-cream);
+  color: var(--gr-maroon);
+  font-family: 'Roboto', 'Nunito', system-ui, sans-serif;
+}
+
+/* ---------- top bar ---------- */
+.gr-top { display: flex; align-items: center; justify-content: flex-end; gap: 22px; height: 96px; padding: 0 6vw; background: var(--gr-tan); }
+.gr-top-logo { margin-right: auto; }
+.gr-logo { display: block; height: 72px; width: auto; mix-blend-mode: multiply; }
+.gr-top-title { font-size: 20px; font-weight: 700; }
+.gr-back { display: grid; place-items: center; width: 42px; height: 42px; padding: 0; font-size: 20px; color: #fff; background: none; border: 2.5px solid #fff; border-radius: 50%; cursor: pointer; }
+.gr-back:hover { background: rgba(255, 255, 255, 0.2); }
+.gr-avatar { position: relative; display: block; width: 52px; height: 52px; overflow: hidden; border: 2px solid #fff; border-radius: 50%; }
+.gr-avatar img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.gr-avatar-sky { position: absolute; inset: 0; background: #cfe9f5; }
+.gr-avatar-hill { position: absolute; left: -20%; right: -20%; bottom: -35%; height: 65%; background: #7aa83a; border-radius: 50%; }
+
+.gr-main { max-width: 1180px; margin: 0 auto; padding: 40px 28px 70px; }
+.gr-h1 { margin: 0 0 6px; font-size: clamp(30px, 4vw, 46px); font-weight: 700; line-height: 1.1; }
+.gr-sub { margin: 0 0 30px 8px; font-size: clamp(17px, 2vw, 22px); font-weight: 500; color: var(--gr-mid); }
+.gr-page-title { margin: 0 0 6px; font-size: clamp(28px, 4vw, 40px); font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
+.gr-hint { margin: 0 0 18px; font-size: 15px; color: var(--gr-mid); }
+
+/* ---------- dashboard cards ---------- */
+.gr-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px 60px; max-width: 1120px; }
+.gr-card {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 190px; padding: 28px 40px;
+  color: var(--gr-maroon); text-decoration: none; background: #fff; border: 3px solid var(--gr-tan); border-radius: 32px;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.gr-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(198, 142, 118, 0.35); }
+.gr-card h2 { margin: 0 0 8px; font-size: clamp(26px, 3vw, 38px); font-weight: 800; letter-spacing: 0.5px; }
+.gr-card p { max-width: 260px; margin: 0; font-size: 16px; font-weight: 500; line-height: 1.4; color: var(--gr-mid); }
+.gr-card-icon { flex: none; width: 120px; height: 120px; color: var(--gr-tan); }
+.gr-card-icon svg { display: block; width: 100%; height: 100%; }
+.gr-footer { display: flex; align-items: center; justify-content: flex-end; gap: 28px; max-width: 1120px; margin-top: 18px; }
+.gr-link { display: inline-flex; align-items: center; gap: 8px; padding: 0; font: inherit; font-size: 18px; font-weight: 700; color: var(--gr-maroon); background: none; border: 0; cursor: pointer; }
+.gr-link:hover { text-decoration: underline; }
+.gr-link.gr-logout { font-size: 20px; }
+
+/* ---------- appointments ---------- */
+.gr-head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.gr-filter {
+  min-width: 200px; height: 46px; padding: 0 46px 0 22px; font: inherit; font-size: 18px; font-weight: 700; color: var(--gr-maroon);
+  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='10'%3E%3Cpath d='M2 2l6 6 6-6' fill='none' stroke='%2346141f' stroke-width='2.5'/%3E%3C/svg%3E") no-repeat right 18px center;
+  border: 2px solid var(--gr-maroon); border-radius: 999px; outline: none; cursor: pointer; appearance: none;
+}
+.gr-table-wrap { overflow-x: auto; border: 2px solid var(--gr-brown); background: #fff; }
+.gr-table { width: 100%; min-width: 820px; border-collapse: collapse; text-align: center; }
+.gr-table th { padding: 16px 12px; font-size: 19px; font-weight: 700; color: #fff; background: var(--gr-brown); }
+.gr-table td { padding: 16px 12px; font-size: 17px; border: 1px solid var(--gr-maroon); }
+.gr-table td:first-child { width: 70px; font-weight: 700; color: #fff; background: var(--gr-tan); border-color: var(--gr-mid); }
+.gr-table tbody tr { cursor: pointer; }
+.gr-table tbody tr:hover td:not(:first-child) { background: #faf1ed; }
+.gr-table tbody tr:focus-visible { outline: 3px solid var(--gr-tan); outline-offset: -3px; }
+.gr-table td.gr-empty { padding: 44px 12px; font-weight: 400; color: var(--gr-mid); cursor: default; background: #fff; }
+.gr-pages { display: flex; justify-content: center; margin-top: 34px; }
+.gr-pages .ant-pagination-item a, .gr-pages .ant-pagination-prev button, .gr-pages .ant-pagination-next button { font-size: 20px; font-weight: 800; color: var(--gr-brown); }
+.gr-pages .ant-pagination-item { background: none; border-color: transparent; }
+.gr-pages .ant-pagination-item-active { border: 1.5px solid var(--gr-tan); background: none; }
+
+.gr-st { font-weight: 700; }
+.gr-st-pending { color: #ee8a1c; }
+.gr-st-confirmed { color: #1f7ae0; }
+.gr-st-in_progress { color: #8a4fc7; }
+.gr-st-completed { color: #2e9a32; }
+.gr-st-cancelled { color: #e11d2e; }
+
+/* appointment details window */
+.gr-detail { display: grid; grid-template-columns: 120px 1fr; gap: 8px 14px; margin: 6px 0 16px; font-size: 16px; }
+.gr-detail dt { font-weight: 700; color: var(--gr-mid); }
+.gr-detail dd { margin: 0; }
+.gr-allergy { margin: 0 0 16px; padding: 10px 14px; font-size: 15px; color: #7a2d00; background: #fff3e6; border: 1.5px solid #f0b36b; border-radius: 12px; }
+.gr-label { margin: 14px 0 8px; font-size: 15px; font-weight: 700; color: var(--gr-mid); }
+.gr-status-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* ---------- services (price list) ---------- */
+.gr-sec { margin: 26px 0 12px; font-size: 22px; font-weight: 700; }
+.gr-pill-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 22px; max-width: 900px; }
+.gr-pill { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 18px; font-size: 17px; font-weight: 700; background: #fff; border: 2.5px solid var(--gr-tan); border-radius: 16px; }
+.gr-pkg-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; max-width: 900px; }
+.gr-pkg { padding: 16px 18px 18px; background: #fff; border: 2.5px solid var(--gr-tan); border-radius: 18px; }
+.gr-pkg h3 { margin: 0; font-size: 18px; font-weight: 700; }
+.gr-pkg .gr-price { margin: 2px 0 8px; font-size: 16px; font-weight: 700; }
+.gr-pkg small { font-size: 13px; font-weight: 700; }
+.gr-pkg ul { margin: 4px 0 0; padding-left: 20px; font-size: 14px; line-height: 1.5; }
+.gr-rates { max-width: 900px; margin-bottom: 22px; overflow-x: auto; }
+.gr-rates table { width: 100%; border-collapse: collapse; text-align: center; background: #fff; }
+.gr-rates caption { padding: 8px; font-weight: 700; color: #fff; background: var(--gr-brown); caption-side: top; }
+.gr-rates th { padding: 7px; font-size: 15px; color: #fff; background: var(--gr-tan); }
+.gr-rates td { padding: 6px 8px; font-size: 14px; border: 1px solid var(--gr-mid); }
+
+/* ---------- my profile ---------- */
+.gr-pf-title { margin: 0 0 4px; font-size: clamp(26px, 3.5vw, 32px); font-weight: 700; color: var(--gr-brown); }
+.gr-pf-sub { margin: 0 0 24px; font-size: 15px; color: var(--gr-mid); }
+.gr-pf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; max-width: 960px; }
+.gr-pf-card { min-height: 270px; padding: 32px 28px; background: #fff; border: 3px solid var(--gr-brown); border-radius: 28px; }
+.gr-pf-sum { display: flex; align-items: flex-start; gap: 22px; }
+.gr-pf-photo-col { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.gr-pf-photo { display: grid; place-items: center; width: 160px; height: 160px; overflow: hidden; font-size: 80px; color: var(--gr-tan); background: #fff; border-radius: 50%; border: 1.5px solid #ead9dc; }
+.gr-pf-photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.gr-pf-text h2 { margin: 6px 0 12px; font-size: 28px; font-weight: 700; color: var(--gr-brown); }
+.gr-pf-text p { margin: 0 0 8px; font-size: 15px; font-weight: 700; color: #000; word-break: break-word; }
+.gr-pf-btn { display: inline-flex; align-items: center; gap: 8px; padding: 8px 28px; font: inherit; font-size: 16px; font-weight: 700; color: #fff; background: #46141f; border: 0; border-radius: 999px; cursor: pointer; }
+.gr-pf-btn.light { color: #fff; background: var(--gr-tan); }
+.gr-pf-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.gr-pf-info h2 { margin: 0 0 24px; font-size: 20px; font-weight: 700; text-align: center; color: var(--gr-brown); }
+.gr-pf-info dl { display: grid; grid-template-columns: 130px 1fr; gap: 20px 14px; margin: 0; font-size: 15px; }
+.gr-pf-info dt { font-weight: 700; color: #555; }
+.gr-pf-info dd { margin: 0; font-weight: 700; color: #000; word-break: break-word; }
+
+.gr-edit { display: grid; grid-template-columns: 260px 1fr; gap: 40px; max-width: 960px; }
+.gr-edit-photo { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.gr-edit-photo .gr-pf-photo { width: 220px; height: 220px; font-size: 110px; }
+.gr-upload { font-size: 15px; font-weight: 700; color: var(--gr-mid); cursor: pointer; }
+.gr-upload:hover { text-decoration: underline; }
+.gr-photo-error { font-size: 13px; color: #e11d2e; }
+.gr-edit-form .ant-form-item-label > label { font-weight: 700; color: var(--gr-tan); }
+.gr-edit-form .ant-input, .gr-edit-form .ant-input-affix-wrapper { border: 1.5px solid var(--gr-tan); border-radius: 10px; }
+.gr-sect { margin: 8px 0 12px; font-size: 16px; font-weight: 700; color: var(--gr-brown); }
+.gr-edit-actions { display: flex; gap: 12px; }
+
+@media (max-width: 860px) {
+  .gr-top { height: 80px; gap: 14px; }
+  .gr-logo { height: 58px; }
+  .gr-cards { grid-template-columns: 1fr; gap: 20px; }
+  .gr-card { min-height: 150px; padding: 20px 24px; border-radius: 26px; }
+  .gr-card-icon { width: 84px; height: 84px; }
+  .gr-pill-grid, .gr-pkg-grid { grid-template-columns: 1fr; }
+  .gr-pf-grid, .gr-edit { grid-template-columns: 1fr; }
+  .gr-pf-sum { flex-direction: column; align-items: center; text-align: center; }
+}
+@media (max-width: 520px) {
+  .gr-top-title { display: none; }
+}
