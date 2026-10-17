@@ -1,0 +1,98 @@
+/* Customer dashboard (scoped with the "cd-" prefix so other dashboards are not affected) */
+.cd {
+  --cd-teal: #12949a;
+  --cd-sky: #7ee5e9;
+  --cd-cream: #fdfaec;
+  min-height: 100vh;
+  background: var(--cd-cream);
+  color: var(--cd-teal);
+  font-family: 'Roboto', 'Nunito', system-ui, sans-serif;
+}
+
+/* ---------- top bar ---------- */
+.cd-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  height: 110px;
+  padding: 0 6vw;
+  background: var(--cd-sky);
+}
+.cd-logo { display: block; height: 76px; width: auto; mix-blend-mode: multiply; }
+.cd-top-title { margin-left: auto; margin-right: 6vw; font-size: 18px; font-weight: 700; color: var(--cd-teal); }
+
+.cd-avatar {
+  position: relative;
+  display: block;
+  width: 38px;
+  height: 38px;
+  overflow: hidden;
+  border: 2px solid #fff;
+  border-radius: 50%;
+}
+.cd-avatar-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cd-avatar-sky { position: absolute; inset: 0; background: #cfe9f5; }
+.cd-avatar-hill {
+  position: absolute;
+  left: -20%;
+  right: -20%;
+  bottom: -35%;
+  height: 65%;
+  background: #7aa83a;
+  border-radius: 50%;
+}
+
+/* ---------- body ---------- */
+.cd-main { max-width: 1010px; margin: 0 auto; padding: 36px 24px 60px; }
+.cd-welcome { margin: 0 0 6px; font-size: clamp(26px, 4vw, 36px); font-weight: 700; color: var(--cd-teal); }
+.cd-sub { margin: 0 0 14px 6px; font-size: 17px; font-weight: 500; }
+
+.cd-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 1fr; gap: 20px; }
+
+.cd-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 120px;
+  padding: 16px 20px 16px 24px;
+  color: var(--cd-teal);
+  text-decoration: none;
+  background: #fff;
+  border: 1.5px solid var(--cd-teal);
+  border-radius: 14px;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.cd-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(18, 148, 154, 0.2); }
+.cd-card-text h3 { margin: 0 0 6px; font-size: 18px; font-weight: 700; }
+.cd-card-text p { margin: 0; font-size: 15px; line-height: 1.35; }
+.cd-card-icon { flex: none; width: 80px; height: 80px; }
+.cd-card-icon svg { display: block; width: 100%; height: 100%; }
+
+/* ---------- footer (security + logout) ---------- */
+.cd-footer { display: flex; align-items: center; justify-content: flex-end; gap: 28px; margin-top: 18px; }
+.cd-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  font: inherit;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--cd-teal);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.cd-link:hover { text-decoration: underline; }
+.cd-logout { font-size: 20px; }
+
+/* ---------- smaller screens ---------- */
+
+@media (max-width: 600px) {
+  .cd-top { height: 84px; }
+  .cd-logo { height: 58px; }
+  .cd-top-title { margin-right: 12px; font-size: 15px; }
+  .cd-grid { grid-template-columns: 1fr; }
+}

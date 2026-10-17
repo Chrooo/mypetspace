@@ -1,0 +1,93 @@
+/* SIGN-UP page (re-uses the .lg-* pieces from Login.css) */
+.su-card { min-height: 430px; padding: 32px 48px; }
+.su-form { width: 100%; max-width: 330px; justify-self: center; }
+.su-title { margin: 0 0 6px; text-align: center; font-size: 22px; font-weight: 800; color: #5a1f2b; }
+.su-note { margin: 0 0 14px; text-align: center; font-size: 10px; color: #5a1f2b; }
+.su-note span { color: #ee1c3f; }
+
+.su-form .lg-input.ant-input-affix-wrapper { height: 42px; border-radius: 18px; }
+.su-form .ant-form-item { margin-bottom: 12px; }
+.su-form .lg-input.ant-input-affix-wrapper input,
+.su-form .lg-input input { background: transparent; }
+.su-form .ant-form-item-explain-error { font-size: 12px; padding-left: 8px; }
+
+.su-form .su-submit.ant-btn {
+  height: 40px;
+  margin-top: 4px;
+  font-size: 16px;
+  font-weight: 800;
+  color: #fff;
+  background: #561c26;
+  border: 0;
+  border-radius: 14px;
+  box-shadow: none;
+}
+.su-form .su-submit.ant-btn:hover { background: #3d121a !important; }
+
+.su-switch { margin: 14px 0 0; text-align: center; font-size: 13px; color: #d9a58c; }
+.su-switch a { color: #ee1c6f; text-decoration: none; }
+.su-switch a:hover { text-decoration: underline; }
+
+@media (max-width: 760px) {
+  .su-card { padding: 28px 22px; }
+  .su-card .lg-brand { order: -1; }
+}
+
+/* plain text inputs (the ones without an icon) get the same look as the password boxes */
+.su-form input.lg-input.ant-input {
+  height: 42px;
+  padding: 0 16px;
+  font-size: 14px;
+  color: #5a1f2b;
+  background: #fff !important;
+  border-radius: 18px;
+  box-shadow: none;
+}
+.su-form input.lg-input.ant-input:not([class*="status-error"]) { border: 1.5px solid #d9a58c; }
+.su-form input.lg-input.ant-input:not([class*="status-error"]):hover,
+.su-form input.lg-input.ant-input:not([class*="status-error"]):focus { border-color: #c98466; box-shadow: 0 0 0 2px rgba(217, 165, 140, 0.25); }
+.su-form input.lg-input.ant-input::placeholder { color: #d98f7a; font-weight: 500; }
+
+/* ---------- step 2: register your pet ---------- */
+.su-form-wide { max-width: 385px; }
+.su-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; }
+
+.su-form .su-submit.su-submit-teal.ant-btn { background: #12949a; }
+.su-form .su-submit.su-submit-teal.ant-btn:hover { background: #0d7a7f !important; }
+
+.su-back {
+  display: block;
+  margin: 10px auto 0;
+  padding: 0;
+  font: inherit;
+  font-size: 13px;
+  color: #12949a;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.su-back:hover { text-decoration: underline; }
+.su-back:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* drop-downs look like the text boxes */
+.su-form .lg-select { width: 100%; height: 42px; }
+.su-form .lg-select .ant-select-selector,
+.su-form .lg-select .ant-select-content { align-items: center; }
+.su-form .lg-select.ant-select .ant-select-selector {
+  height: 42px;
+  padding: 0 16px;
+  background: #fff;
+  border: 1.5px solid #d9a58c;
+  border-radius: 18px;
+  box-shadow: none;
+}
+.su-form .lg-select.ant-select:hover .ant-select-selector,
+.su-form .lg-select.ant-select-focused .ant-select-selector { border-color: #c98466; box-shadow: 0 0 0 2px rgba(217, 165, 140, 0.25); }
+.su-form .lg-select .ant-select-placeholder { color: #d98f7a; font-weight: 500; }
+.su-form .lg-select .ant-select-selection-item { color: #5a1f2b; font-size: 14px; }
+.su-form .lg-select .ant-select-suffix { color: #b98a78; }
+.su-form .lg-select.ant-select-status-error .ant-select-selector { border-color: #ff4d4f; }
+
+@media (max-width: 520px) {
+  .su-row { grid-template-columns: 1fr; }
+}
