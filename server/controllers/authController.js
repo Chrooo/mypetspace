@@ -66,7 +66,7 @@ const register = async (req, res) => {
       throw petErr;
     }
 
-    await logAction('New User Registered', user, `Fur Parent account: ${identifier} (pet: ${petResult.pet.name})`);
+    await logAction('Registered new account', user, { affected: user.fullName });
 
     res.status(201).json({ token: makeToken(user), user });
   } catch (err) {
@@ -85,6 +85,7 @@ const login = async (req, res) => {
 
     const user = await UserModel.findOne({ identifier }).select('+password');
     if (!user || !(await user.comparePassword(req.body.password))) {
+      if (user) await logAction('Login attempt', user, { status: 'failed' }); // wrong password for a real account
       return res.status(401).json({ message: 'Incorrect email/phone or password.' });
     }
 
@@ -93,7 +94,7 @@ const login = async (req, res) => {
       return res.json({ twoFactorRequired: true, twoFactorToken: makeTwoFactorTicket(user) });
     }
 
-    await logAction('User Logged In', user, `Role: ${user.role}`);
+    await logAction('Login attempt', user);
     res.json({ token: makeToken(user), user });
   } catch (err) {
     console.error(err);
@@ -122,7 +123,7 @@ const createStaff = async (req, res) => {
       password: req.body.password,
       role: req.body.role,
     });
-    await logAction('Account Created', req.user, `Created ${user.role} account for ${user.fullName}`);
+    await logAction('Created new account', req.user, { affected: user.fullName });
 
     res.status(201).json({ user });
   } catch (err) {
@@ -132,10 +133,29 @@ const createStaff = async (req, res) => {
 };
 
 // GET /api/users  (admin only) - every account, newest first (passwords are never included)
+// ?role=customer|staff|groomer|admin &search= &sort=latest|oldest|alphabetical &page= &pageSize=
 const listUsers = async (req, res) => {
   try {
-    const users = await UserModel.find().sort({ createdAt: -1 });
-    res.json({ users });
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const pageSize = Math.min(50, Math.max(1, parseInt(req.query.pageSize, 10) || 10));
+
+    const filter = {};
+    if (['admin', 'staff', 'groomer', 'customer'].includes(req.query.role)) filter.role = req.query.role;
+    const search = String(req.query.search || '').trim();
+    if (search) {
+      const text = new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+      filter.$or = [{ firstName: text }, { lastName: text }, { identifier: text }];
+    }
+
+    let sort = { createdAt: -1 };
+    if (req.query.sort === 'oldest') sort = { createdAt: 1 };
+    if (req.query.sort === 'alphabetical') sort = { firstName: 1, lastName: 1 };
+
+    const [users, total] = await Promise.all([
+      UserModel.find(filter).sort(sort).skip((page - 1) * pageSize).limit(pageSize),
+      UserModel.countDocuments(filter),
+    ]);
+    res.json({ users, total, page, pageSize });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Internal Server Error' });
@@ -244,7 +264,7 @@ const updateMe = async (req, res) => {
     user.identifier = identifier;
     user.avatar = avatar;
     await user.save();
-    await logAction('Profile Updated', user, `Changed: ${changes.join(', ')}`);
+    await logAction('Profile Updated', user, { affected: `Changed: ${changes.join(', ')}` });
 
     res.json({ user, message: 'Your profile was updated.' });
   } catch (err) {

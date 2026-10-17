@@ -26,7 +26,8 @@ router.post('/2fa/disable', protect, twoFactor.disable);
 
 router.post('/createStaff', protect, authorize('admin'), authController.createStaff);
 router.get('/users', protect, authorize('admin'), authController.listUsers);
-router.get('/admin/dashboard', protect, authorize('admin'), adminController.getDashboard);
+router.get('/admin/summary', protect, authorize('admin'), adminController.getSummary);
+router.get('/admin/payments', protect, authorize('admin'), adminController.listPayments);
 router.get('/admin/audit-logs', protect, authorize('admin'), adminController.listAuditLogs);
 
 module.exports = router;
