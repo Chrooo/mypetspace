@@ -23,7 +23,8 @@ export const saveLogin = ({ token, user }) => {
   localStorage.setItem('user', JSON.stringify(user));
   setHeader(token);
 };
-
+// keep the saved user in sync after the profile is edited (the token stays the same)
+export const saveUser = (user) => localStorage.setItem('user', JSON.stringify(user));
 export const logout = () => {
   localStorage.removeItem('token');
   localStorage.removeItem('user');

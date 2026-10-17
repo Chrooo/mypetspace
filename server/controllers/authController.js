@@ -1,6 +1,8 @@
 const UserModel = require('../models/User');
 const { makeToken, makeTwoFactorTicket } = require('../utils/tokens');
 const { logAction } = require('../utils/audit');
+const PetModel = require('../models/Pet');
+const { cleanPet } = require('./petController');
 
 /* ---------- helpers ---------- */
 
@@ -33,10 +35,14 @@ const validate = ({ firstName, lastName, identifier, password }) => {
 /* ---------- controllers ---------- */
 
 // POST /api/register  (public - always creates a Customer)
+// A Fur Parent must register at least one pet, so the account and the pet are created together.
 const register = async (req, res) => {
   try {
     const error = validate(req.body);
     if (error) return res.status(400).json({ message: error });
+
+    const petResult = cleanPet(req.body.pet);
+    if (petResult.error) return res.status(400).json({ message: petResult.error });
 
     const identifier = cleanIdentifier(req.body.identifier);
     if (await UserModel.findOne({ identifier })) {
@@ -51,7 +57,16 @@ const register = async (req, res) => {
       password: req.body.password,
       role: 'customer',
     });
-    await logAction('New User Registered', user, `Fur Parent account: ${identifier}`);
+
+    // save the pet; if that fails, remove the new account so nobody is left without a pet
+    try {
+      await PetModel.create({ ...petResult.pet, owner: user._id });
+    } catch (petErr) {
+      await UserModel.deleteOne({ _id: user._id });
+      throw petErr;
+    }
+
+    await logAction('New User Registered', user, `Fur Parent account: ${identifier} (pet: ${petResult.pet.name})`);
 
     res.status(201).json({ token: makeToken(user), user });
   } catch (err) {
@@ -139,4 +154,106 @@ const checkIdentifier = async (req, res) => {
   }
 };
 
-module.exports = { register, login, createStaff, listUsers, checkIdentifier };
+// the profile photo is a small image sent as a data URL (the browser shrinks it first)
+const AVATAR_RE = /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/;
+const MAX_AVATAR_CHARS = 300000; // about 220 KB of image
+
+// GET /api/me  (any logged-in user) - the current account, straight from the database
+const getMe = async (req, res) => {
+  res.json({ user: req.user });
+};
+
+// PUT /api/me  (any logged-in user) - edit your OWN name, email/phone, photo and password
+// Changing the email/phone or the password needs the current password.
+// The role is never read from req.body.
+const updateMe = async (req, res) => {
+  try {
+    const user = await UserModel.findById(req.user._id).select('+password');
+    if (!user) return res.status(401).json({ message: 'Please log in again.' });
+
+    const body = req.body || {};
+    const changes = [];
+
+    // names
+    const firstName = body.firstName === undefined ? user.firstName : String(body.firstName).trim();
+    const lastName = body.lastName === undefined ? user.lastName : String(body.lastName).trim();
+    if (!firstName) return res.status(400).json({ message: 'First name is required.' });
+    if (!lastName) return res.status(400).json({ message: 'Last name is required.' });
+    if (!NAME_RE.test(firstName) || !NAME_RE.test(lastName) || firstName.length > 50 || lastName.length > 50) {
+      return res.status(400).json({
+        message: 'Names can only have letters, spaces, apostrophes, periods and hyphens (50 characters max).',
+      });
+    }
+    if (firstName !== user.firstName || lastName !== user.lastName) changes.push('name');
+
+    // email / phone
+    let identifier = user.identifier;
+    if (body.identifier !== undefined) {
+      const cleaned = cleanIdentifier(body.identifier);
+      if (!cleaned) return res.status(400).json({ message: 'Enter a valid email or a mobile number like 09123456789.' });
+      if (cleaned !== user.identifier) {
+        if (await UserModel.exists({ identifier: cleaned, _id: { $ne: user._id } })) {
+          return res.status(409).json({ message: 'An account with this email or phone already exists.' });
+        }
+        identifier = cleaned;
+        changes.push('email/phone');
+      }
+    }
+
+    // photo ('' removes it)
+    let avatar = user.avatar || '';
+    if (body.avatar !== undefined) {
+      const value = String(body.avatar);
+      if (value && (!AVATAR_RE.test(value) || value.length > MAX_AVATAR_CHARS)) {
+        return res.status(400).json({ message: 'Photo must be a PNG, JPG or WEBP image under 200 KB.' });
+      }
+      if (value !== avatar) changes.push('photo');
+      avatar = value;
+    }
+
+    // password
+    const wantsNewPassword = body.newPassword !== undefined && body.newPassword !== '';
+    if (wantsNewPassword) {
+      const pw = String(body.newPassword);
+      if (pw.length < 8 || !/[A-Za-z]/.test(pw) || !/\d/.test(pw)) {
+        return res.status(400).json({ message: 'New password must be at least 8 characters with a letter and a number.' });
+      }
+    }
+
+    // the current password protects the sensitive changes
+    if (wantsNewPassword || identifier !== user.identifier) {
+      if (!body.currentPassword) {
+        return res.status(400).json({ message: 'Enter your current password to change your email/phone or password.' });
+      }
+      if (!(await user.comparePassword(String(body.currentPassword)))) {
+        return res.status(401).json({ message: 'Your current password is incorrect.' });
+      }
+    }
+    if (wantsNewPassword) {
+      if (await user.comparePassword(String(body.newPassword))) {
+        return res.status(400).json({ message: 'Your new password must be different from the current one.' });
+      }
+      user.password = String(body.newPassword); // hashed by the model before saving
+      changes.push('password');
+    }
+
+    if (changes.length === 0) return res.json({ user, message: 'No changes to save.' });
+
+    user.firstName = firstName;
+    user.lastName = lastName;
+    user.identifier = identifier;
+    user.avatar = avatar;
+    await user.save();
+    await logAction('Profile Updated', user, `Changed: ${changes.join(', ')}`);
+
+    res.json({ user, message: 'Your profile was updated.' });
+  } catch (err) {
+    if (err && err.code === 11000) {
+      return res.status(409).json({ message: 'An account with this email or phone already exists.' });
+    }
+    console.error(err);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+module.exports = { register, login, createStaff, listUsers, checkIdentifier, getMe, updateMe };

@@ -1,7 +1,8 @@
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 
 import Landing from './components/Landing/Landing';
-import AuthPage from './components/Auth/AuthPage';
+import Login from './components/Auth/Login';
+import SignUp from './components/Auth/SignUp';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
 import DashboardRedirect from './components/Dashboard/DashboardRedirect';
 
@@ -30,7 +31,8 @@ import Profile from './components/Customer/Profile';
 import MyReservations from './components/Customer/MyReservations';
 import MyAppointments from './components/Customer/MyAppointments';
 import MyPets from './components/Customer/MyPets';
-import MyPayments from './components/Customer/MyPayments';
+import MyPayments from './components/Customer/MyPayments'
+import MyBookings from './components/Customer/MyBookings';;
 
 // groomer
 import GroomerDashboard from './components/Groomer/GroomerDashboard';
@@ -62,8 +64,8 @@ function App() {
     <Routes>
       {/* ---------- public ---------- */}
       <Route path="/" element={<Landing />} />
-      <Route path="/login" element={<AuthPage mode="login" />} />
-      <Route path="/signup" element={<AuthPage mode="signup" />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<SignUp />} />
 
       <Route path="/about" element={<AboutUs />} />
       <Route path="/services" element={<Services />} />
