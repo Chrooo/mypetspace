@@ -1,57 +1,96 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Alert, Empty, Spin } from 'antd';
-import AdminLayout, { fmtDate, fmtTime } from './AdminLayout';
-import { API_URL } from '../../auth';
+import { Link, useNavigate } from 'react-router-dom';
+import { BookFilled, DollarCircleFilled, FileAddFilled, LogoutOutlined, TeamOutlined } from '@ant-design/icons';
+import AdminLayout from './AdminLayout';
+import { API_URL, getUser, logout } from '../../auth';
+
+const CARDS = [
+  { title: 'USERS', desc: 'Modify, View, and Manage Users', to: '/manage/users', icon: <TeamOutlined /> },
+  { title: 'REGISTER', desc: 'Create New Account for Staffs and Groomers', to: '/admin/register', icon: <FileAddFilled /> },
+  { title: 'PAYMENTS', desc: 'View, and Manage Transaction Payments', to: '/admin/payments', icon: <DollarCircleFilled /> },
+  { title: 'AUDIT LOGS', desc: 'View, and Manage Activity History of the System', to: '/admin/audit-logs', icon: <BookFilled /> },
+];
+
+const peso = (n) => `₱${Number(n || 0).toLocaleString('en-PH')}`;
+const when = (d) =>
+  new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) +
+  ', ' +
+  new Date(d).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 
 function AdminDashboard() {
-  const [data, setData] = useState(null);
-  const [error, setError] = useState('');
+  const navigate = useNavigate();
+  const user = getUser();
+  const [data, setData] = useState(null); // live numbers from GET /api/admin/summary
 
   useEffect(() => {
     axios
-      .get(`${API_URL}/admin/dashboard`)
+      .get(`${API_URL}/admin/summary`)
       .then((response) => setData(response.data))
-      .catch((err) => setError(err.response?.data?.message || 'Could not load the dashboard.'));
+      .catch(() => setData(null)); // the cards still work if the numbers can't load
   }, []);
 
-  const s = data?.stats || {};
-  const tiles = [
-    { label: 'Total users', value: s.totalUsers },
-    { label: 'Fur Parents', value: s.customers },
-    { label: 'Hotel Staff', value: s.staff },
-    { label: 'Groomers', value: s.groomers },
-    { label: 'Two-factor users', value: s.twoFactor },
-    { label: 'Activity today', value: s.activityToday },
+  // the four numbers an admin checks first
+  const stats = [
+    { label: 'Total users', value: data?.totalUsers },
+    { label: 'New sign-ups (7 days)', value: data?.newSignups },
+    { label: 'Failed logins (24 hours)', value: data?.failedLogins, warn: data?.failedLogins > 0 },
+    { label: 'Payments this month', value: data ? peso(data.paymentsThisMonth) : undefined },
   ];
 
   return (
-    <AdminLayout title="Admin Dashboard" active="Dashboard">
-      {error && <Alert type="error" showIcon title={error} style={{ marginBottom: 16 }} />}
+    <AdminLayout>
+      <h1 className="adm-welcome">Welcome, {user?.firstName || 'Admin'}!</h1>
+      <p className="adm-welcome-sub">This is the Admin Dashboard</p>
 
       <div className="adm-stats">
-        {tiles.map((tile) => (
-          <div key={tile.label} className="adm-stat">
-            <div className="adm-stat-label">{tile.label}</div>
-            <div className="adm-stat-value">{tile.value ?? '—'}</div>
+        {stats.map((stat) => (
+          <div key={stat.label} className="adm-stat">
+            <div className="adm-stat-label">{stat.label}</div>
+            <div className={`adm-stat-value${stat.warn ? ' adm-bad' : ''}`}>{stat.value ?? '—'}</div>
           </div>
         ))}
       </div>
 
-      <h2 className="adm-section">Recent Activity</h2>
-      {!data && !error && <Spin />}
-      {data && data.recent.length === 0 && <Empty description="No activity yet" />}
-      {data && data.recent.length > 0 && (
-        <div className="adm-list">
+      <div className="adm-cards">
+        {CARDS.map((card) => (
+          <Link key={card.title} to={card.to} className="adm-card">
+            <div>
+              <h2>{card.title}</h2>
+              <p>{card.desc}</p>
+            </div>
+            <span className="adm-card-icon">{card.icon}</span>
+          </Link>
+        ))}
+      </div>
+
+      {data?.recent.length > 0 && (
+        <section className="adm-recent">
+          <h2>
+            Recent Activity <Link to="/admin/audit-logs">View all</Link>
+          </h2>
           {data.recent.map((log) => (
-            <div key={log._id} className="adm-row">
-              <span className="adm-row-title">{log.action}</span>
-              <span className="adm-row-date">{fmtDate(log.createdAt)}</span>
-              <span className="adm-row-time">{fmtTime(log.createdAt)}</span>
+            <div key={log._id} className="adm-recent-row">
+              <span>
+                {log.action}
+                {log.status === 'failed' && <b className="adm-bad"> (failed)</b>}
+                <small>{[log.actorName, log.affected].filter(Boolean).join(' → ')}</small>
+              </span>
+              <span>{when(log.createdAt)}</span>
             </div>
           ))}
-        </div>
+        </section>
       )}
+
+      <button
+        className="adm-logout"
+        onClick={() => {
+          logout();
+          navigate('/');
+        }}
+      >
+        Logout <LogoutOutlined />
+      </button>
     </AdminLayout>
   );
 }

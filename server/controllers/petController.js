@@ -74,7 +74,7 @@ const createPet = async (req, res) => {
     }
 
     const pet = await PetModel.create({ ...result.pet, owner: req.user._id });
-    await logAction('Pet Added', req.user, `Added pet: ${pet.name}`);
+    await logAction('Pet Added', req.user, { affected: pet.name });
     res.status(201).json({ pet });
   } catch (err) {
     serverError(res, err);
@@ -94,7 +94,7 @@ const updatePet = async (req, res) => {
 
     Object.assign(pet, result.pet); // the owner is never taken from the request
     await pet.save();
-    await logAction('Pet Updated', req.user, `Updated pet: ${pet.name}`);
+    await logAction('Pet Updated', req.user, { affected: pet.name });
     res.json({ pet });
   } catch (err) {
     serverError(res, err);
@@ -110,7 +110,7 @@ const deletePets = async (req, res) => {
     }
 
     const result = await PetModel.deleteMany({ _id: { $in: ids }, owner: req.user._id });
-    await logAction('Pet Deleted', req.user, `Deleted ${result.deletedCount} pet(s)`);
+    await logAction('Pet Deleted', req.user, { affected: `${result.deletedCount} pet(s)` });
     res.json({ deleted: result.deletedCount });
   } catch (err) {
     serverError(res, err);

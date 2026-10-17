@@ -32,12 +32,13 @@ const loginSecondStep = async (req, res) => {
     const result = await tf.verifySecondFactor(user, req.body.code);
     if (result !== 'ok') {
       tf.recordFailure(user._id);
+      await logAction('Login attempt', user, { status: 'failed' });
       if (result === 'used') return res.status(401).json(CODE_USED);
       return res.status(401).json({ message: 'That code is not correct. Please try again.' });
     }
 
     tf.clearFailures(user._id);
-    await logAction('User Logged In', user, `Role: ${user.role} (two-factor)`);   
+    await logAction('Login attempt', user);
     res.json({ token: makeToken(user), user });
   } catch (err) {
     console.error(err);
