@@ -1,0 +1,261 @@
+/* ---------- Booking steps (Select Pet) ---------- */
+
+/* Back on the left, Next on the right (as in the design) */
+.page-shell .page-actions { justify-content: space-between; }
+
+/* Next stays grey until the step is complete */
+.btn:disabled,
+.btn:disabled:hover {
+  background: #c8d0da;
+  border-color: #c8d0da;
+  color: #fff;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* active step = pink circle */
+.page-steps .ant-steps-item-process .ant-steps-item-icon {
+  background: var(--pink);
+  border-color: var(--pink);
+}
+
+.bk-alert { max-width: 760px; margin-bottom: 16px; }
+
+.bk-body {
+  display: grid;
+  grid-template-columns: minmax(240px, 320px) minmax(280px, 420px);
+  gap: 54px;
+  align-items: start;
+  margin-top: 8px;
+}
+
+.bk-label { display: block; margin: 0 0 8px; font-size: 22px; font-weight: 800; color: var(--maroon); }
+.bk-hint { margin: 10px 0 0; font-size: 13px; line-height: 1.45; }
+
+/* the dropdown */
+.bk-select { width: 100%; }
+.bk-select.ant-select .ant-select-selector {
+  height: 38px;
+  align-items: center;
+  font-weight: 700;
+  color: var(--maroon);
+  background: transparent;
+  border: 1.5px solid var(--maroon);
+  border-radius: 10px;
+}
+
+/* the white box that shows the chosen pet */
+.bk-card {
+  min-height: 312px;
+  padding: 18px 22px;
+  background: #fff;
+  border: 3px solid #111;
+  border-radius: 20px;
+}
+.bk-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 270px;
+  text-align: center;
+}
+
+.bk-pet-head { display: flex; align-items: center; gap: 14px; padding-bottom: 12px; border-bottom: 1.5px solid #f3e6e8; }
+.bk-pet-head h2 { margin: 0; font-size: 24px; font-weight: 800; }
+.bk-pet-head p { margin: 2px 0 0; font-size: 14px; }
+.bk-photo {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 72px;
+  height: 72px;
+  overflow: hidden;
+  color: var(--tan);
+  background: #fdf3f5;
+  border-radius: 50%;
+}
+.bk-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.bk-photo svg { width: 38px; height: 38px; }
+
+.bk-details { display: grid; grid-template-columns: auto 1fr; gap: 8px 18px; margin: 14px 0 0; font-size: 15px; }
+.bk-details dt { font-weight: 800; }
+.bk-details dd { margin: 0; overflow-wrap: anywhere; }
+
+@media (max-width: 860px) {
+  .bk-body { grid-template-columns: 1fr; gap: 24px; }
+  .bk-card { min-height: 240px; }
+}
+
+/* ---------- Select Services ---------- */
+.sv-card {
+  max-width: 760px;
+  padding: 24px 40px 22px;
+  background: #fff;
+  border: 3px solid #111;
+  border-radius: 20px;
+}
+.sv-title { margin: 0 0 18px; font-size: 22px; font-weight: 800; color: var(--maroon); }
+
+/* 3 columns x 3 rows, filled column by column: services, services, packages */
+.sv-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(3, auto);
+  grid-auto-flow: column;
+  gap: 14px 10px;
+}
+.sv-tile {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 60px;
+  padding: 8px 18px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: left;
+  color: var(--maroon);
+  background: #ffdce3;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.sv-tile b { white-space: nowrap; }
+.sv-tile:hover { border-color: var(--pink); }
+.sv-tile.is-on { color: #fff; background: var(--pink); }
+.sv-tile:focus-visible { outline: 3px solid var(--teal); outline-offset: 2px; }
+
+.sv-foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 6px 16px;
+  margin-top: 16px;
+  font-size: 14px;
+  font-weight: 700;
+}
+.sv-foot small { font-weight: 400; }
+
+@media (max-width: 860px) {
+  .sv-card { padding: 20px; }
+  .sv-grid { grid-template-columns: 1fr; grid-template-rows: none; grid-auto-flow: row; }
+}
+/* ---------- Select Date & Time ---------- */
+.sc-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  max-width: 760px;
+  padding: 24px 0;
+  background: #fff;
+  border: 3px solid #111;
+  border-radius: 20px;
+}
+.sc-col { padding: 0 40px; }
+.sc-right { border-left: 3px solid #111; }
+.sc-title { margin: 0 0 18px; font-size: 22px; font-weight: 800; color: var(--maroon); }
+.sc-hint { margin: 14px 0 0; font-size: 13px; line-height: 1.45; }
+.sc-empty { display: grid; place-items: center; min-height: 120px; margin: 0; text-align: center; font-size: 14px; }
+
+/* the date box: cream pill with a tan outline and a calendar icon on the right */
+.sc-date.ant-picker {
+  width: 100%;
+  height: 40px;
+  padding: 0 16px;
+  background: #fdf9ea;
+  border: 1.5px solid var(--tan);
+  border-radius: 999px;
+  box-shadow: none;
+}
+.sc-date.ant-picker input { color: var(--maroon); font-weight: 700; }
+.sc-date.ant-picker input::placeholder { color: var(--peach); font-weight: 400; }
+.sc-date.ant-picker .ant-picker-suffix { color: var(--tan); }
+
+/* time slots */
+.sc-slots { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px 14px; }
+.sc-slot {
+  min-width: 86px;
+  height: 31px;
+  padding: 0 14px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  color: #fff;
+  background: var(--pink);
+  border: 2px solid var(--pink);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.sc-slot:hover:not(:disabled) { background: var(--pink-dark); border-color: var(--pink-dark); }
+.sc-slot.is-on { background: var(--maroon); border-color: var(--maroon); }
+.sc-slot:disabled {
+  color: #8f98a3;
+  background: #e3e7ec;
+  border-color: #e3e7ec;
+  text-decoration: line-through;
+  cursor: not-allowed;
+}
+.sc-slot:focus-visible { outline: 3px solid var(--teal); outline-offset: 2px; }
+
+@media (max-width: 860px) {
+  .sc-card { grid-template-columns: 1fr; gap: 24px; padding: 20px 0; }
+  .sc-col { padding: 0 20px; }
+  .sc-right { padding-top: 24px; border-left: 0; border-top: 3px solid #111; }
+}
+/* ---------- Confirmation ---------- */
+.cf-alert { max-width: 760px; margin-bottom: 14px; }
+
+.cf-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  max-width: 760px;
+  padding: 26px 0;
+  background: #fff;
+  border: 3px solid #111;
+  border-radius: 20px;
+}
+.cf-left { padding: 0 40px; }
+.cf-right { padding: 0 30px; border-left: 3px solid #111; }
+.cf-title { margin: 0 0 18px; font-size: 28px; font-weight: 800; color: var(--pink); }
+
+.cf-rows { margin: 0; }
+.cf-row { display: grid; grid-template-columns: 110px 1fr; gap: 12px; padding: 7px 0; font-size: 16px; font-weight: 800; }
+.cf-row dt, .cf-row dd { margin: 0; }
+.cf-row dd { overflow-wrap: anywhere; }
+
+.cf-photo {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  color: var(--tan);
+  background: #fdf3f5;
+  border-radius: 14px;
+}
+.cf-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cf-photo svg { width: 64px; height: 64px; }
+.cf-pet-name { margin: 8px 0 0; font-size: 30px; font-weight: 800; color: var(--pink); }
+.cf-pet-breed { margin: 0; font-size: 16px; }
+.cf-loading { display: grid; place-items: center; min-height: 160px; }
+
+.cf-check { display: inline-flex; align-items: center; gap: 8px; margin-top: 14px; font-size: 14px; cursor: pointer; }
+.cf-check input { width: 18px; height: 18px; accent-color: var(--pink); cursor: pointer; }
+
+/* orange Confirm button (grey while it can't be used yet) */
+.btn.cf-confirm:not(:disabled) { color: #fff; background: #ff8a24; border-color: #ff8a24; }
+.btn.cf-confirm:not(:disabled):hover { background: #e57614; border-color: #e57614; }
+
+.cf-modal-text { margin: 0; font-size: 16px; line-height: 1.5; }
+.cf-modal-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 12px; }
+
+@media (max-width: 860px) {
+  .cf-card { grid-template-columns: 1fr; gap: 24px; padding: 20px 0; }
+  .cf-left, .cf-right { padding: 0 20px; }
+  .cf-right { padding-top: 24px; border-left: 0; border-top: 3px solid #111; }
+  .cf-row { grid-template-columns: 90px 1fr; }
+}

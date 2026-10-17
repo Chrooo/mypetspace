@@ -5,6 +5,7 @@ const petController = require('../controllers/petController');
 const twoFactor = require('../controllers/twoFactorController');
 const adminController = require('../controllers/adminController');
 const groomerController = require('../controllers/groomerController');
+const appointmentController = require('../controllers/appointmentController');
 const { protect, authorize } = require('../middleware/authMiddleware');
 
 router.post('/register', authController.register);
@@ -17,6 +18,11 @@ router.get('/pets', protect, petController.listMyPets);
 router.post('/pets', protect, petController.createPet);
 router.post('/pets/delete', protect, petController.deletePets);
 router.put('/pets/:id', protect, petController.updatePet);
+
+// booking: which time slots are still open on a date (same roles that can open the booking pages)
+router.get('/appointments/availability', protect, authorize('customer', 'staff', 'admin'), appointmentController.getAvailability);
+router.get('/appointments/assignment', protect, authorize('customer', 'staff', 'admin'), appointmentController.getAssignment);
+router.post('/appointments', protect, authorize('customer', 'staff', 'admin'), appointmentController.createAppointment);
 
 // two-factor authentication
 router.post('/login/2fa', twoFactor.loginSecondStep);
