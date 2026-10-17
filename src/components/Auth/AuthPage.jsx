@@ -24,6 +24,12 @@ const nameRules = (label) => [
   { max: 50, message: 'Maximum of 50 characters' },
 ];
 
+// "Confirm password" must match the password field
+const matchPassword = ({ getFieldValue }) => ({
+  validator: (_, value) =>
+    !value || getFieldValue('password') === value ? Promise.resolve() : Promise.reject(new Error('Passwords do not match')),
+});
+
 const COPY = {
   login: {
     title: 'Log in',
@@ -214,6 +220,17 @@ function AuthPage({ mode }) {
                   autoComplete={isSignup ? 'new-password' : 'current-password'}
                 />
               </Form.Item>
+
+              {isSignup && (
+                <Form.Item
+                  name="confirmPassword"
+                  dependencies={['password']}
+                  hasFeedback
+                  rules={[{ required: true, message: 'Confirm your password' }, matchPassword]}
+                >
+                  <Input.Password prefix={<LockOutlined />} placeholder="Confirm password" autoComplete="new-password" />
+                </Form.Item>
+              )}
 
               <Button type="primary" htmlType="submit" block loading={submitting} className="auth-submit">
                 {copy.button}
