@@ -30,6 +30,11 @@ const AppointmentSchema = new mongoose.Schema(
     status: { type: String, enum: STATUSES, default: 'pending' },
     groomingNotes: { type: String, default: '', maxlength: 500 }, // written by the groomer
     completedAt: { type: Date },
+    // payment (staff record it on the Bookings page)
+    total: { type: Number, default: 0, min: 0 }, // in pesos
+    paymentStatus: { type: String, enum: ['unpaid', 'paid'], default: 'unpaid' },
+    paymentMethod: { type: String, enum: ['', 'GCASH', 'MAYA', 'BANK', 'CASH'], default: '' },
+    paidAt: { type: Date },
   },
   { timestamps: true, toJSON: { virtuals: true, transform: (doc, ret) => { delete ret.id; delete ret.__v; return ret; } } }
 );

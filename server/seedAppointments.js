@@ -63,6 +63,8 @@ const SAMPLE = [
     groomer: groomer._id,
     scheduledAt: new Date(Date.now() + (i - 5) * day),
     status,
+    total: 300 + (i % 4) * 150,
+    ...(status === 'completed' ? { paymentStatus: 'paid', paymentMethod: 'CASH', paidAt: new Date() } : {}),
   }));
   await Appointment.insertMany(rows);
   console.log(`Added ${rows.length} sample appointments for ${groomer.fullName}.`);

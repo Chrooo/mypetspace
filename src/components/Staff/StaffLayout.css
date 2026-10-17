@@ -1,0 +1,67 @@
+/* Staff pages (scoped with the "sd-" prefix so the other dashboards are not affected) */
+.sd {
+  --sd-pink: #e6005c;
+  --sd-header: #ffa0a8;
+  --sd-cream: #fbf7e8;
+  /* the shared table / pills styles read these, so the tables come out pink here */
+  --adm-maroon: #e6005c;
+  --adm-mid: #e6005c;
+  --adm-cream: #fbf7e8;
+  min-height: 100vh;
+  background: var(--sd-cream);
+  color: var(--sd-pink);
+  font-family: 'Roboto', 'Nunito', system-ui, sans-serif;
+}
+
+/* ---------- top bar ---------- */
+.sd-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 110px; padding: 0 6vw; background: var(--sd-header); }
+.sd-logo { display: block; height: 76px; width: auto; mix-blend-mode: multiply; }
+.sd-top-right { display: flex; align-items: center; gap: 18px; }
+.sd-top-title { font-size: 18px; font-weight: 700; color: #fff; }
+.sd-back { display: flex; padding: 0; border: 0; background: none; color: #fff; font-size: 26px; cursor: pointer; }
+.sd-avatar { position: relative; display: block; width: 38px; height: 38px; padding: 0; overflow: hidden; border: 2px solid #fff; border-radius: 50%; background: none; cursor: pointer; }
+.sd-avatar-img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.sd-avatar-sky { position: absolute; inset: 0; background: #cfe9f5; }
+.sd-avatar-hill { position: absolute; left: -20%; right: -20%; bottom: -35%; height: 65%; border-radius: 50%; background: #7aa83a; }
+
+/* ---------- page ---------- */
+.sd-main { max-width: 1240px; margin: 0 auto; padding: 36px 32px 60px; }
+
+/* ---------- dashboard (same layout as the user dashboard) ---------- */
+.sd-dash { max-width: 1010px; margin: 0 auto; }
+.sd-welcome { margin: 0 0 6px; font-size: clamp(26px, 4vw, 36px); font-weight: 700; }
+.sd-sub { margin: 0 0 14px 6px; font-size: 17px; font-weight: 500; }
+.sd-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-rows: 1fr; gap: 20px; }
+.sd-card { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 120px; padding: 16px 20px 16px 24px; border: 1.5px solid var(--sd-pink); border-radius: 14px; background: #fff; color: var(--sd-pink); text-decoration: none; transition: transform 0.15s, box-shadow 0.15s; }
+.sd-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(230, 0, 92, 0.2); }
+.sd-card-text h3 { margin: 0 0 6px; font-size: 18px; font-weight: 700; }
+.sd-card-text p { margin: 0; font-size: 15px; line-height: 1.35; }
+.sd-card-icon { flex: none; width: 70px; height: 70px; }
+.sd-card-icon svg { display: block; width: 100%; height: 100%; }
+.sd-footer { display: flex; align-items: center; justify-content: flex-end; gap: 28px; margin-top: 18px; }
+.sd-link { display: inline-flex; align-items: center; gap: 8px; padding: 0; border: 0; background: none; color: var(--sd-pink); font: inherit; font-size: 20px; font-weight: 700; cursor: pointer; }
+.sd-link:hover { text-decoration: underline; }
+
+/* ---------- tables: pink version of the shared table ---------- */
+.sd .adm-table td:first-child { border-color: var(--sd-header); background: var(--sd-header); }
+.sd .adm-pill:hover { background: #ffe3e7; }
+.sd .adm-pill.on { color: #fff; }
+
+/* row actions and statuses (Bookings page) */
+.sd .adm-act { padding: 0; border: 0; background: none; color: var(--sd-pink); font: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; }
+.sd .adm-act:hover { text-decoration: none; }
+.sd .adm-st { font-weight: 700; }
+.sd .adm-st.pending, .sd .adm-st.unpaid { color: #e8821a; }
+.sd .adm-st.confirmed { color: #2b6fe0; }
+.sd .adm-st.in_progress { color: #8a3fd1; }
+.sd .adm-st.completed, .sd .adm-st.paid { color: #2e9e12; }
+.sd .adm-st.cancelled { color: #e11d2e; }
+
+@media (max-width: 900px) { .sd-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) {
+  .sd-top { height: 84px; }
+  .sd-logo { height: 58px; }
+  .sd-top-title { font-size: 15px; }
+  .sd-main { padding: 28px 16px 48px; }
+  .sd-grid { grid-template-columns: 1fr; }
+}

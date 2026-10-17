@@ -5,7 +5,7 @@ const petController = require('../controllers/petController');
 const twoFactor = require('../controllers/twoFactorController');
 const adminController = require('../controllers/adminController');
 const groomerController = require('../controllers/groomerController');
-const appointmentController = require('../controllers/appointmentController');
+const staffAppointmentsController = require('../controllers/staffAppointmentsController');
 const { protect, authorize } = require('../middleware/authMiddleware');
 
 router.post('/register', authController.register);
@@ -34,6 +34,13 @@ router.post('/2fa/disable', protect, twoFactor.disable);
 // groomer: only the appointments assigned to me
 router.get('/groomer/appointments', protect, authorize('groomer'), groomerController.listMyAppointments);
 router.put('/groomer/appointments/:id', protect, authorize('groomer'), groomerController.updateMyAppointment);
+
+// staff and admin: every grooming appointment, and the bookings/payments list
+router.get('/staff/appointments', protect, authorize('staff', 'admin'), staffAppointmentsController.listAppointments);
+router.put('/staff/appointments/:id', protect, authorize('staff', 'admin'), staffAppointmentsController.updateAppointment);
+router.get('/staff/groomers', protect, authorize('staff', 'admin'), staffAppointmentsController.listGroomers);
+router.get('/staff/bookings', protect, authorize('staff', 'admin'), staffAppointmentsController.listBookings);
+router.put('/staff/bookings/:id/payment', protect, authorize('staff', 'admin'), staffAppointmentsController.recordPayment);
 
 router.post('/createStaff', protect, authorize('admin'), authController.createStaff);
 router.get('/users', protect, authorize('admin'), authController.listUsers);
