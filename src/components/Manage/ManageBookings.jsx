@@ -47,6 +47,7 @@ function ManageBookings() {
   const [amount, setAmount] = useState(null);
   const [saving, setSaving] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [confirming, setConfirming] = useState(null); // the Pending booking whose Confirm window is open
 
   useEffect(() => {
     axios.get(`${API_URL}/staff/groomers`).then((r) => setGroomers(r.data.groomers)).catch(() => {});
@@ -117,12 +118,55 @@ function ManageBookings() {
     }
   };
 
+  // ---- Confirm: the payment window comes first ----
+  // hotel: what is still to pay (null = Peak/Holiday, the shop has not set the price yet)
+  // grooming: the price worked out from the pet's weight (0 = could not be worked out)
+  const dueOf = (b) => (type === 'hotel' ? (b.total > 0 ? b.balance : null) : b.paymentStatus === 'paid' ? 0 : b.total > 0 ? b.total : null);
+  const needsAmount = (b) => (type === 'hotel' ? !(b.total > 0) : b.paymentStatus !== 'paid' && !(b.total > 0));
+  const openConfirm = (b) => {
+    setMethod('CASH');
+    setAmount(needsAmount(b) ? null : dueOf(b));
+    setConfirming(b);
+  };
+  const closeConfirm = () => setConfirming(null);
+
+  const confirmOnly = async (b) => {
+    setSaving(true);
+    try {
+      await axios.put(url(b), { status: 'confirmed' });
+      message.success('Booking confirmed.');
+      closeConfirm();
+      refresh();
+    } catch (err) {
+      message.error(err.response?.data?.message || 'Could not confirm the booking.');
+    } finally {
+      setSaving(false);
+    }
+  };
+  const payAndConfirm = async (b) => {
+    setSaving(true);
+    try {
+      if (type === 'hotel') {
+        await axios.put(url(b), { status: 'confirmed', payBalance: method, total: needsAmount(b) ? amount : undefined });
+      } else {
+        await axios.put(`${API_URL}/staff/bookings/${b._id}/payment`, { method, total: amount, confirm: true });
+      }
+      message.success('Payment recorded and booking confirmed.');
+      closeConfirm();
+      refresh();
+    } catch (err) {
+      message.error(err.response?.data?.message || 'Could not record the payment.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const viewing = rows.find((r) => r._id === viewId) || null;
   const statusText = (b) => <span className={`adm-st ${b.status}`}>{STATUS_LABEL[b.status]}</span>;
   const actions = (b) => <button className="adm-act" onClick={() => setViewId(b._id)}>View</button>;
   const confirm = (b) =>
     b.status === 'pending' ? (
-      <button className="adm-act" onClick={() => update(b, { status: 'confirmed' }, 'Booking confirmed.')}>Confirm</button>
+      <button className="adm-act" onClick={() => openConfirm(b)}>Confirm</button>
     ) : null;
 
   const groomingColumns = [
@@ -161,6 +205,7 @@ function ManageBookings() {
       : [
           ['Customer', b.customerName],
           ['Pet', `${b.petName} (${b.petType}${b.petBreed ? `, ${b.petBreed}` : ''})`],
+          ['Weight', b.petWeight ? `${b.petWeight} kg` : 'Not given'],
           ['Services', b.services.join(', ')],
           ['Appointment', dayjs(b.scheduledAt).format('MMM DD, YYYY - h:mm A')],
           ['Total', b.total > 0 ? peso(b.total) : 'Not set yet'],
@@ -260,6 +305,62 @@ function ManageBookings() {
             </div>
           </>
         )}
+      </Modal>
+
+      {/* Confirm: take the payment first, then the booking becomes Confirmed */}
+      <Modal open={!!confirming} title="Confirm booking" footer={null} centered onCancel={closeConfirm}>
+        {confirming && (() => {
+          const b = confirming;
+          const due = dueOf(b);
+          const settled = due === 0; // nothing left to collect (already paid)
+          const lockAmount = type === 'hotel' ? !needsAmount(b) : false; // a hotel pays the balance; grooming staff can correct the amount
+          const payable = Number(amount) > 0;
+          return (
+            <div style={{ display: 'grid', gap: 12 }}>
+              <dl className="mb-details" style={{ display: 'grid', gap: 6, margin: 0 }}>
+                {(type === 'hotel'
+                  ? [['Customer', b.customerName], ['Pet', b.petName], ['Room', `${b.roomName} (Slot ${b.slot})`], ['Stay', stayText(b)],
+                     ['Total', b.total > 0 ? peso(b.total) : 'To be set by the shop'], ['Already paid', peso(b.paid)]]
+                  : [['Customer', b.customerName], ['Pet', `${b.petName}${b.petWeight ? ` (${b.petWeight} kg)` : ''}`], ['Services', b.services.join(', ')]]
+                ).map(([k, v]) => (
+                  <div key={k} style={{ display: 'grid', gridTemplateColumns: '38% 1fr', gap: 8 }}>
+                    <dt style={{ fontWeight: 700 }}>{k}</dt>
+                    <dd style={{ margin: 0 }}>{v}</dd>
+                  </div>
+                ))}
+              </dl>
+
+              {settled ? (
+                <Alert type="success" showIcon title={type === 'hotel' ? 'This stay is fully paid.' : 'This booking is already paid.'} />
+              ) : (
+                <div style={{ display: 'grid', gap: 8, padding: 12, border: '1px dashed #bbb', borderRadius: 8 }}>
+                  <b>{needsAmount(b) ? (type === 'hotel' ? 'Set the price of the stay' : 'Enter the amount') : `Amount to pay: ${peso(due)}`}</b>
+                  {type === 'grooming' && !b.petWeight && <small>This pet has no weight on file, so the price could not be worked out.</small>}
+                  <label>
+                    Amount (₱)
+                    <InputNumber min={1} value={amount} onChange={setAmount} disabled={lockAmount} style={{ width: '100%' }} />
+                  </label>
+                  <label>
+                    Paid by
+                    <Select value={method} onChange={setMethod} options={METHODS} style={{ width: '100%' }} />
+                  </label>
+                </div>
+              )}
+
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                <button type="button" className="btn btn-outline-teal" onClick={closeConfirm}>Cancel</button>
+                {settled ? (
+                  <button type="button" className="btn btn-pink" disabled={saving} onClick={() => confirmOnly(b)}>Confirm booking</button>
+                ) : (
+                  <>
+                    <button type="button" className="btn btn-outline-teal" disabled={saving} onClick={() => confirmOnly(b)}>Confirm without payment</button>
+                    <button type="button" className="btn btn-pink" disabled={!payable || saving} onClick={() => payAndConfirm(b)}>Record payment &amp; confirm</button>
+                  </>
+                )}
+              </div>
+            </div>
+          );
+        })()}
       </Modal>
 
       <NewBookingModal

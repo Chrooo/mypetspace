@@ -38,6 +38,14 @@ const checkAge = (_, value) => {
   return Promise.resolve();
 };
 
+// weight in kg: 0.1 to 100 (grooming prices depend on it)
+const checkWeight = (_, value) => {
+  const v = String(value ?? '').trim();
+  if (!v) return Promise.reject(new Error('Enter the weight'));
+  if (!/^\d+(\.\d+)?$/.test(v) || Number(v) < 0.1 || Number(v) > 100) return Promise.reject(new Error('Enter a weight from 0.1 to 100 kg'));
+  return Promise.resolve();
+};
+
 const ageText = (age) => `${age} ${Number(age) === 1 ? 'year' : 'years'} old`;
 
 // shrink the chosen photo to a 360x360 JPEG so it is small enough to save
@@ -152,6 +160,7 @@ function MyPets() {
         name: pet.name,
         breed: pet.breed,
         age: String(pet.age),
+        weight: pet.weight ? String(pet.weight) : '',
         gender: pet.gender,
         type: pet.type,
         notes: pet.notes || '',
@@ -194,6 +203,7 @@ function MyPets() {
       name: values.name.trim(),
       breed: values.breed.trim(),
       age: values.age,
+      weight: values.weight,
       gender: values.gender,
       type: values.type,
       notes: (values.notes || '').trim(),
@@ -284,7 +294,7 @@ function MyPets() {
                     <h2>{pet.name}</h2>
                     <p>{pet.type} - {pet.gender}</p>
                     <p>{pet.breed}</p>
-                    <p>{ageText(pet.age)}</p>
+                    <p>{ageText(pet.age)}{pet.weight ? ` - ${pet.weight} kg` : ''}</p>
                   </div>
                   {selecting ? (
                     <CheckCircleFilled className={`mp-tick${isOn ? ' is-on' : ''}`} />
@@ -359,6 +369,12 @@ function MyPets() {
               </Form.Item>
               <Form.Item name="age" rules={[{ validator: checkAge }]}>
                 <Input className="mp-input" prefix={<span className="mp-prefix">Age:</span>} inputMode="decimal" maxLength={5} />
+              </Form.Item>
+            </div>
+
+            <div className="mp-row">
+              <Form.Item name="weight" rules={[{ validator: checkWeight }]}>
+                <Input className="mp-input" prefix={<span className="mp-prefix">Weight (kg):</span>} inputMode="decimal" maxLength={5} />
               </Form.Item>
             </div>
 

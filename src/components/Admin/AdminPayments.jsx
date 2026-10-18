@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Alert, DatePicker, Input } from 'antd';
+import { Alert, DatePicker, Input, Select } from 'antd';
 import AdminLayout from './AdminLayout';
 import DataTable, { SortSelect, fmtDateTime } from './AdminUI';
 import { API_URL } from '../../auth';
@@ -14,6 +14,7 @@ const columns = [
   { title: 'Date & Time', bold: true, render: (r) => fmtDateTime(r.createdAt) },
   { title: 'MOP', render: (r) => METHODS[r.method] || r.method },
   { title: 'Transaction No.', render: (r) => r.transactionNo },
+  { title: 'Type', render: (r) => r.type },
 ];
 
 function AdminPayments() {
@@ -26,6 +27,7 @@ function AdminPayments() {
   const [sort, setSort] = useState();
   const [search, setSearch] = useState('');
   const [range, setRange] = useState(null);
+  const [type, setType] = useState('');
 
   useEffect(() => {
     setLoading(true);
@@ -36,6 +38,7 @@ function AdminPayments() {
           pageSize: PAGE_SIZE,
           sort,
           search,
+          type: type || undefined,
           from: range?.[0]?.format('YYYY-MM-DD'),
           to: range?.[1]?.format('YYYY-MM-DD'),
         },
@@ -47,7 +50,7 @@ function AdminPayments() {
       })
       .catch((err) => setError(err.response?.data?.message || 'Could not load the payments.'))
       .finally(() => setLoading(false));
-  }, [page, sort, search, range]);
+  }, [page, sort, search, range, type]);
 
   const reset = (setter) => (value) => {
     setter(value);
@@ -59,7 +62,7 @@ function AdminPayments() {
       <div className="adm-head">
         <div>
           <h1 className="adm-title">PAYMENTS</h1>
-          <p className="adm-sub">Payments History of Hotel Bookings</p>
+          <p className="adm-sub">Payments history of hotel bookings and grooming appointments</p>
         </div>
         <div className="adm-tools">
           <SortSelect value={sort} onChange={reset(setSort)} />
@@ -69,6 +72,13 @@ function AdminPayments() {
       <div className="adm-search">
         <Input.Search allowClear placeholder="Search name or transaction no." onSearch={reset(setSearch)} style={{ width: 300 }} />
         <DatePicker.RangePicker onChange={reset(setRange)} />
+        <Select
+          value={type}
+          onChange={reset(setType)}
+          style={{ width: 150 }}
+          aria-label="Filter by type"
+          options={[{ value: '', label: 'All payments' }, { value: 'hotel', label: 'Hotel' }, { value: 'grooming', label: 'Grooming' }]}
+        />
       </div>
 
       {error && <Alert type="error" showIcon title={error} style={{ marginBottom: 16 }} />}
@@ -81,7 +91,7 @@ function AdminPayments() {
         total={total}
         onPage={setPage}
         loading={loading}
-        empty="No payments yet. They will show here once hotel bookings are paid."
+        empty="No payments yet. They will show here once hotel bookings or grooming appointments are paid."
       />
     </AdminLayout>
   );

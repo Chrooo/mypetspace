@@ -13,6 +13,7 @@ const { takenSlots, FULL_MESSAGE: ROOM_FULL } = require('./roomController');
 const { receiptFor } = require('./staffReservationsController');
 const { numbersFor } = require('./paymentsController');
 const { findRoom, buildStay } = require('../utils/rooms');
+const { groomingTotal } = require('../utils/pricing');
 
 // Staff and admin book FOR a customer (walk-ins, phone calls). Same rules as the customer booking pages,
 // but the customer and the pet are chosen by staff, a payment can be recorded on the spot (cash by default),
@@ -35,13 +36,13 @@ const listCustomers = async (req, res) => {
       filter.$or = [{ firstName: text }, { lastName: text }, { identifier: text }];
     }
     const users = await UserModel.find(filter).sort({ firstName: 1, lastName: 1 }).limit(15);
-    const pets = await PetModel.find({ owner: { $in: users.map((u) => u._id) } }).select('name type breed owner photo');
+    const pets = await PetModel.find({ owner: { $in: users.map((u) => u._id) } }).select('name type breed weight owner photo');
     res.json({
       customers: users.map((u) => ({
         _id: u._id,
         name: u.fullName,
         identifier: u.identifier,
-        pets: pets.filter((p) => String(p.owner) === String(u._id)).map((p) => ({ _id: p._id, name: p.name, type: p.type, breed: p.breed })),
+        pets: pets.filter((p) => String(p.owner) === String(u._id)).map((p) => ({ _id: p._id, name: p.name, type: p.type, breed: p.breed, weight: p.weight })),
       })),
     });
   } catch (err) {
@@ -82,7 +83,7 @@ const createCustomer = async (req, res) => {
     }
     await logAction('Walk-in Customer Registered', req.user, { affected: user.fullName });
     res.status(201).json({
-      customer: { _id: user._id, name: user.fullName, identifier, pets: [{ _id: pet._id, name: pet.name, type: pet.type, breed: pet.breed }] },
+      customer: { _id: user._id, name: user.fullName, identifier, pets: [{ _id: pet._id, name: pet.name, type: pet.type, breed: pet.breed, weight: pet.weight }] },
       tempPassword,
     });
   } catch (err) {
@@ -103,7 +104,8 @@ const loadCustomerPet = async (customerId, petId) => {
 
 // POST /api/staff/appointments
 // body: { customerId, petId, services, date, time, groomerId?, total?, paymentMethod? }
-// total = what the shop charges (grooming prices depend on the pet's size, so staff type it).
+// total = only needed when the price cannot be worked out (a package for a pet that has no weight yet).
+//         Otherwise the price comes from the services and the pet's weight.
 // paymentMethod ("CASH", ...) = the customer paid now. Leave it out to collect later.
 const createAppointmentFor = async (req, res) => {
   try {
@@ -120,8 +122,8 @@ const createAppointmentFor = async (req, res) => {
     const slot = checkSlot(String(date || ''), String(time || ''));
     if (slot.error) return res.status(400).json({ message: slot.error });
 
-    let amount = 0;
-    if (total !== undefined && total !== null && total !== '') {
+    let amount = groomingTotal(list, pet.weight);
+    if (!(amount > 0) && total !== undefined && total !== null && total !== '') {
       amount = Number(total);
       if (!Number.isFinite(amount) || amount < 0) return res.status(400).json({ message: 'Enter a valid amount.' });
     }
@@ -144,6 +146,7 @@ const createAppointmentFor = async (req, res) => {
       petType: pet.type,
       petBreed: pet.breed,
       petAge: pet.age,
+      petWeight: pet.weight,
       petGender: pet.gender,
       petNotes: pet.notes,
       services: list,
