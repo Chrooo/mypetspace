@@ -398,4 +398,4 @@ const updateMe = async (req, res) => {
   }
 };
 
-module.exports = { cleanIdentifier, validate, register, login, createStaff, listUsers, getUserById, checkIdentifier, checkUsername, getMe, updateMe };
+module.exports = { register, login, createStaff, listUsers, getUserById, checkIdentifier, getMe, updateMe };
