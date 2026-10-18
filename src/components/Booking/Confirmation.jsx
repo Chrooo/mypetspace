@@ -179,29 +179,34 @@ function GroomingConfirmation({ type }) {
       {slotError && <Alert type="error" showIcon title={slotError} className="cf-alert" action={<Link to={`/book/${type}/schedule`}>Choose another time</Link>} />}
       {submitError && <Alert type="error" showIcon title={submitError} className="cf-alert" />}
 
-      <section className="cf-card">
-        <div className="cf-left">
+      <section className="cf-card cf-room" aria-label="Booking summary">
+        <header className="cf-head">
           <h2 className="cf-title">Booking Summary</h2>
-          <dl className="cf-rows">
-            {rows.map(([label, value]) => (
-              <div key={label} className="cf-row">
-                <dt>{label}</dt>
-                <dd>{value}</dd>
-              </div>
-            ))}
-          </dl>
-        </div>
+        </header>
 
-        <div className="cf-right">
-          {pet ? (
-            <>
-              <div className="cf-photo">{pet.photo ? <img src={pet.photo} alt={pet.name} /> : <PawIcon />}</div>
-              <h3 className="cf-pet-name">{pet.name}</h3>
-              <p className="cf-pet-breed">{pet.breed}</p>
-            </>
-          ) : (
-            !petError && <div className="cf-loading"><Spin /></div>
-          )}
+        <div className="cf-body">
+          <div className="cf-left">
+            <dl className="cf-rows">
+              {rows.map(([label, value]) => (
+                <div key={label} className="cf-row">
+                  <dt>{label}</dt>
+                  <dd>{value}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+
+          <div className="cf-right">
+            {pet ? (
+              <>
+                <div className="cf-photo">{pet.photo ? <img src={pet.photo} alt={pet.name} /> : <PawIcon />}</div>
+                <h3 className="cf-pet-name">{pet.name}</h3>
+                <p className="cf-pet-breed">{pet.breed}</p>
+              </>
+            ) : (
+              !petError && <div className="cf-loading"><Spin /></div>
+            )}
+          </div>
         </div>
       </section>
 
@@ -236,20 +241,12 @@ function GroomingConfirmation({ type }) {
 }
 
 // ---------- room booking ----------
-// What the earlier steps remembered: pet, room, dates, time, hours (Day Boarding), slot
-const ROOM_NAMES = ['pet', 'room', 'dates', 'time', 'outTime', 'hours', 'slot'];
-const clearRoomBooking = (type) => {
-  try {
-    ROOM_NAMES.forEach((n) => sessionStorage.removeItem(key(type, n)));
-  } catch (err) {
-    /* ignore */
-  }
-};
+// What the earlier steps remembered: pet, room, dates, time, hours (Day Boarding), slot.
+// This step only shows the summary: Confirm goes on to the Payment step, which saves the booking.
 
 function RoomConfirmation({ type }) {
   const navigate = useNavigate();
 
-  // read once, so clearing the saved choices after booking doesn't redirect this page
   const [draft] = useState(() => {
     const dates = readJson(key(type, 'dates'));
     return {
@@ -266,10 +263,6 @@ function RoomConfirmation({ type }) {
   const [pet, setPet] = useState(null);
   const [petError, setPetError] = useState('');
   const [agreed, setAgreed] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState('');
-  const [slotError, setSlotError] = useState(''); // the slot was taken while the customer was confirming
-  const [booked, setBooked] = useState(false);
 
     const complete = !!draft.petId && !!draft.room && !!draft.dates && !!draft.time && !!draft.outTime && !!draft.slot;
 
@@ -309,29 +302,7 @@ function RoomConfirmation({ type }) {
   const timeText = isDay
     ? `${hourLabel(startHour)} - ${hourLabel(endHour)} (${endHour - startHour} hours)`
     : `Check-in ${hourLabel(startHour)}, check-out ${hourLabel(endHour)}`;
-  const onConfirm = async () => {
-    setSubmitting(true);
-    setSubmitError('');
-    try {
-      await axios.post(`${API_URL}/rooms/reservations`, {
-        petId: draft.petId,
-        roomId: room.id,
-        slot: draft.slot,
-        start: dates.start,
-        end: dates.end,
-        time: draft.time,
-        outTime: draft.outTime,
-      });
-      clearRoomBooking(type);
-      setBooked(true);
-    } catch (err) {
-      const message = err.response?.data?.message || 'Could not reach the server. Please try again.';
-      if (err.response?.status === 409) setSlotError(message);
-      else setSubmitError(message);
-    } finally {
-      setSubmitting(false);
-    }
-  };
+  const onConfirm = () => navigate(`/book/${type}/payment`);
 
   const rows = [
     ['Pet', pet ? `${pet.name} (${pet.breed})` : '...'],
@@ -348,38 +319,35 @@ function RoomConfirmation({ type }) {
       title="Book a Room"
       subtitle="Choose the perfect room for your fur babies."
       customNext={
-        <button type="button" className="btn cf-confirm" disabled={!pet || !agreed || submitting || !!slotError} onClick={onConfirm}>
-          {submitting ? 'Confirming...' : 'Confirm'}
+        <button type="button" className="btn cf-confirm" disabled={!pet || !agreed} onClick={onConfirm}>
+          Confirm
         </button>
       }
     >
       {petError && <Alert type="error" showIcon title={petError} className="cf-alert" action={<Link to={`/book/${type}/pet-details`}>Choose a pet</Link>} />}
-      {slotError && <Alert type="error" showIcon title={slotError} className="cf-alert" action={<Link to={`/book/${type}/services`}>Choose another slot</Link>} />}
-      {submitError && <Alert type="error" showIcon title={submitError} className="cf-alert" />}
 
-      <section className="cf-card">
-        <div className="cf-left">
+      <section className="cf-card cf-room" aria-label="Booking summary">
+        <header className="cf-head">
           <h2 className="cf-title">Booking Summary</h2>
-          <dl className="cf-rows">
-            {rows.map(([label, value]) => (
-              <div key={label} className="cf-row">
-                <dt>{label}</dt>
-                <dd>{value}</dd>
-              </div>
-            ))}
-          </dl>
-        </div>
+        </header>
 
-        <div className="cf-right">
-          {pet ? (
-            <>
-              <div className="cf-photo">{pet.photo ? <img src={pet.photo} alt={pet.name} /> : <PawIcon />}</div>
-              <h3 className="cf-pet-name">{pet.name}</h3>
-              <p className="cf-pet-breed">{pet.breed}</p>
-            </>
-          ) : (
-            !petError && <div className="cf-loading"><Spin /></div>
-          )}
+        <div className="cf-body">
+          <div className="cf-left">
+            <dl className="cf-rows">
+              {rows.map(([label, value]) => (
+                <div key={label} className="cf-row">
+                  <dt>{label}</dt>
+                  <dd>{value}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+
+          <div className="cf-right">
+            <div className="cf-photo"><img src={room.img} alt={room.name} /></div>
+            <h3 className="cf-pet-name">{room.name}</h3>
+            {room.sub && <p className="cf-pet-breed">{room.sub}</p>}
+          </div>
         </div>
       </section>
 
@@ -387,26 +355,6 @@ function RoomConfirmation({ type }) {
         <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} />
         <span>I confirm that the booking details are correct.</span>
       </label>
-
-      <Modal
-        open={booked}
-        centered
-        closable={false}
-        maskClosable={false}
-        keyboard={false}
-        title="Booking Confirmed"
-        footer={
-          <div className="cf-modal-actions">
-            <button type="button" className="btn btn-outline-teal" onClick={() => navigate('/')}>Back to Home</button>
-            <button type="button" className="btn btn-pink" onClick={() => navigate(`/book/${type}/pet-details`)}>Book Another</button>
-          </div>
-        }
-      >
-        <p className="cf-modal-text">
-          {pet ? `${pet.name}'s` : 'Your'} stay in {room.name} (slot {draft.slot}) on {dateText} has been booked.
-          Would you like to book another room?
-        </p>
-      </Modal>
     </BookingStep>
   );
 }
@@ -432,4 +380,3 @@ function Confirmation() {
 }
 
 export default Confirmation;
-

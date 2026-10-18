@@ -13,6 +13,7 @@ import peakHoliday from '../assets/room-peak-holiday.jpg';
 //   category  -> used by the Filter dropdown (same headings as the Rooms page)
 //   price     -> number used for the Low-High sort and for totals (null = no fixed price)
 //   unit      -> 'hour' for Day Boarding, 'night' for the rest
+//   desc, amenities -> the text on the left of the Slots section
 //   priceText -> the line shown on the card
 //   kind      -> 'day' (Day Boarding: one day, by the hour) or 'night' (overnight stay)
 //   maxPets   -> pets per room type = number of slots (squares) the customer can pick from
@@ -23,6 +24,8 @@ export const ROOM_CATEGORIES = ['Boarding', 'Royal and Suite', 'Best-Seller'];
 export const ROOM_OPTIONS = [
   {
     id: 'day-boarding',
+    desc: 'A comfortable daytime stay for pets who need a safe and welcoming place while their owners are away. Perfect for short visits, playtime, relaxation, and supervised care throughout the day.',
+    amenities: ["Comfortable resting area", "Supervised daytime stay", "Clean and pet-friendly environment", "Feeding according to the owner's instructions", "Optional pet grooming and salon services"],
     kind: 'day',
     maxPets: 5,
     name: 'Day Boarding',
@@ -35,6 +38,8 @@ export const ROOM_OPTIONS = [
   },
   {
     id: 'dashing-deluxe',
+    desc: 'A cozy overnight room for small to semi-medium pets, with a soft bed, fresh air and caring staff keeping watch through the night.',
+    amenities: ["Air-conditioned room", "Comfortable bed", "Play area access", "24/7 CCTV monitoring", "Feeding according to the owner's instructions"],
     kind: 'night',
     maxPets: 6,
     name: 'Dashing Deluxe',
@@ -46,6 +51,8 @@ export const ROOM_OPTIONS = [
   },
   {
     id: 'robust-room',
+    desc: 'A spacious overnight room made for large to extra large pets who need extra space to stretch, rest and feel at home.',
+    amenities: ["Air-conditioned room", "Extra-roomy comfortable bed", "Play area access", "24/7 CCTV monitoring", "Feeding according to the owner's instructions"],
     kind: 'night',
     maxPets: 4,
     name: 'Robust Room',
@@ -57,6 +64,8 @@ export const ROOM_OPTIONS = [
   },
   {
     id: 'robust-kitty',
+    desc: 'A calm, roomy overnight space designed for cats, with a quiet corner to relax and plenty of room to climb and lounge.',
+    amenities: ["Air-conditioned room", "Comfortable bed and lounging area", "Quiet, cat-friendly environment", "24/7 CCTV monitoring", "Feeding according to the owner's instructions"],
     kind: 'night',
     maxPets: 6,
     name: 'Robust Kitty',
@@ -68,6 +77,8 @@ export const ROOM_OPTIONS = [
   },
   {
     id: 'royal-kitty',
+    desc: 'A cozy overnight suite for cats and small to semi-medium pets, with a soft bed and a peaceful, clean environment.',
+    amenities: ["Air-conditioned room", "Comfortable bed", "Clean and pet-friendly environment", "24/7 CCTV monitoring", "Feeding according to the owner's instructions"],
     kind: 'night',
     maxPets: 4,
     name: 'Royal Kitty',
@@ -79,6 +90,8 @@ export const ROOM_OPTIONS = [
   },
   {
     id: 'couple-suite',
+    desc: 'A generous suite for two large to extra large pets who love to stay together, with room for both to rest and play.',
+    amenities: ["Air-conditioned suite", "Comfortable beds for two", "Play area access", "24/7 CCTV monitoring", "Feeding according to the owner's instructions"],
     kind: 'night',
     maxPets: 2,
     name: 'Couple Suite',
@@ -90,6 +103,8 @@ export const ROOM_OPTIONS = [
   },
   {
     id: 'five-star',
+    desc: 'Our best-seller for longer stays: a comfortable overnight room with a special rate when your pet stays 5 consecutive nights.',
+    amenities: ["Air-conditioned room", "Comfortable bed", "FREE Quick Rinse Warm Bath", "Play area access", "24/7 CCTV monitoring"],
     kind: 'night',
     maxPets: 4,
     name: 'Five Star',
@@ -102,6 +117,8 @@ export const ROOM_OPTIONS = [
   },
   {
     id: 'staycation',
+    desc: 'The best value for extended stays: a comfortable overnight room with a special rate when your pet stays 15 consecutive nights.',
+    amenities: ["Air-conditioned room", "Comfortable bed", "FREE Quick Rinse Warm Bath", "FREE Dry Cleansing Bathe", "24/7 CCTV monitoring"],
     kind: 'night',
     maxPets: 4,
     name: 'Staycation',
@@ -114,6 +131,8 @@ export const ROOM_OPTIONS = [
   },
   {
     id: 'peak-holiday',
+    desc: 'A comfortable overnight room for holidays and peak seasons, when special rates and a surcharge apply.',
+    amenities: ["Air-conditioned room", "Comfortable bed", "Play area access", "24/7 CCTV monitoring", "Surcharge applies on holidays and peak seasons"],
     kind: 'night',
     maxPets: 5,
     name: 'Peak/Holiday',
@@ -132,7 +151,7 @@ export const CLOSE_HOUR = 20;        // day boarding must end by 8:00 pm
 export const MIN_DAY_HOURS = 3;
 export const MAX_DAY_HOURS = 12;
 
-// the check-in and check-out times offered in the Slots pop-up
+// the check-in and check-out times offered in the Slots section
 export const CHOICE_HOURS = [7, 10, 13, 16, 19];
 
 export const hourLabel = (h) => `${h % 12 === 0 ? 12 : h % 12}:00 ${h < 12 ? 'AM' : 'PM'}`;
