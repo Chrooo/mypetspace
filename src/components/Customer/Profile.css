@@ -1,4 +1,4 @@
-/* My Profile page (top bar styles come from CustomerDashboard.css) */
+/* My Profile page (top bar styles come from CustomerDashboard.css, the picture from Avatar.css) */
 .pf-back {
   display: grid;
   place-items: center;
@@ -14,48 +14,42 @@
 }
 .pf-back:hover { background: #0d7a7f; }
 .cd-top .cd-top-title { margin-right: 18px; }
-.cd-avatar-img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-.pf-main { max-width: 1010px; margin: 0 auto; padding: 32px 24px 60px; }
-.pf-title { margin: 0 0 4px; font-size: clamp(26px, 4vw, 32px); font-weight: 700; letter-spacing: 0.3px; color: var(--cd-teal); }
-.pf-sub { margin: 0 0 24px; font-size: 15px; color: #3b9a9f; }
-.pf-notice { margin-bottom: 18px; }
+.pf-main { max-width: 1320px; margin: 0 auto; padding: 72px 6vw 80px; }
+.pf-notice { max-width: 1000px; margin: 0 auto 22px; }
+.pf-error { margin: 4px 0 0 220px; }
 
-.pf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; align-items: stretch; }
-.pf-card {
-  min-height: 325px;
-  padding: 36px 28px;
-  background: #fff;
-  border: 3px solid var(--cd-teal);
-  border-radius: 28px;
-}
+.pf-layout { display: flex; align-items: flex-start; justify-content: center; gap: 110px; }
 
-/* left card */
-.pf-summary { display: flex; align-items: center; }
-.pf-summary-row { display: flex; align-items: flex-start; gap: 10px; width: 100%; }
-.pf-photo-col { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+/* left: photo + Upload Image + Save changes */
+.pf-side { flex: none; display: flex; flex-direction: column; align-items: center; gap: 18px; width: 300px; padding-top: 6px; }
 .pf-photo {
-  display: grid;
-  place-items: center;
-  width: 193px;
-  height: 193px;
+  width: 270px;
+  height: 270px;
+  margin-bottom: 10px;
   overflow: hidden;
-  font-size: 80px;
-  color: #fff;
   background: #9bd7da;
   border-radius: 50%;
 }
-.pf-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.pf-photo-sm { width: 84px; height: 84px; font-size: 38px; flex: none; }
-.pf-edit {
+.pf-upload-link {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
   gap: 8px;
-  width: 138px;
-  height: 35px;
-  font: inherit;
   font-size: 18px;
+  font-weight: 700;
+  color: var(--cd-teal);
+  cursor: pointer;
+}
+.pf-upload-link:hover { text-decoration: underline; }
+.pf-upload-remove { padding: 0; font: inherit; font-size: 16px; color: #c0392b; background: none; border: 0; cursor: pointer; }
+.pf-upload-remove:hover { text-decoration: underline; }
+.pf-upload-hint { max-width: 260px; font-size: 14px; text-align: center; color: #777; }
+.pf-upload-error { max-width: 260px; font-size: 14px; text-align: center; color: #c0392b; }
+.pf-save-btn {
+  margin-top: 14px;
+  padding: 10px 40px;
+  font: inherit;
+  font-size: 19px;
   font-weight: 700;
   color: #fff;
   background: var(--cd-teal);
@@ -63,48 +57,68 @@
   border-radius: 999px;
   cursor: pointer;
 }
-.pf-edit:hover { background: #0d7a7f; }
+.pf-save-btn:hover { background: #0d7a7f; }
+.pf-save-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-.pf-summary-text { min-width: 0; padding-top: 28px; color: #000; }
-.pf-summary-text h2 { margin: 0 0 12px; font-size: 28px; font-weight: 700; color: var(--cd-teal); overflow-wrap: anywhere; }
-.pf-summary-text p { margin: 0 0 14px; font-size: 16px; font-weight: 700; overflow-wrap: anywhere; }
+/* right: the form */
+.pf-form { flex: 1; min-width: 0; max-width: 780px; }
+.pf-form .ant-form-item { margin-bottom: 30px; }
+.pf-form .ant-form-item-label > label { font-size: 18px; font-weight: 700; color: var(--cd-teal); }
+.pf-form .ant-form-item-extra { font-size: 14px; }
+.pf-form .ant-form-item-explain-error { font-size: 14px; }
 
-/* right card */
-.pf-info h2 { margin: 0 0 26px; font-size: 20px; font-weight: 700; text-align: center; color: var(--cd-teal); }
-.pf-info dl { display: grid; grid-template-columns: 160px 1fr; gap: 24px 0; margin: 0; padding: 0 14px; font-size: 16px; }
-.pf-info dt { font-weight: 500; color: #555; }
-.pf-info dd { margin: 0; font-weight: 700; color: #000; overflow-wrap: anywhere; }
+.pf-form .pf-input.ant-input-affix-wrapper {
+  height: 46px;
+  padding: 0 14px;
+  font-size: 17px;
+  background: #fff;
+  border: 1.5px solid var(--cd-teal);
+  border-radius: 12px;
+  box-shadow: none;
+}
+.pf-form .pf-input.ant-input-affix-wrapper input { font-size: 17px; color: #222; }
+.pf-form .pf-input.ant-input-affix-wrapper input[readonly] { cursor: default; }
+.pf-form .pf-input.ant-input-affix-wrapper.is-editing,
+.pf-form .pf-input.ant-input-affix-wrapper:focus-within { box-shadow: 0 0 0 3px rgba(18, 148, 154, 0.18); }
+.pf-form .ant-form-item-has-error .pf-input.ant-input-affix-wrapper { border-color: #ff4d4f; }
+.pf-pencil { display: grid; place-items: center; padding: 0; font-size: 20px; color: var(--cd-teal); background: none; border: 0; cursor: pointer; }
+.pf-pencil:hover { color: #0d7a7f; }
 
-/* edit window */
-.pf-upload { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
-.pf-upload-btn {
-  display: inline-block;
-  padding: 6px 16px;
+.pf-pw-toggle { margin: -10px 0 26px 220px; }
+.pf-link { padding: 0; font: inherit; font-size: 16px; font-weight: 700; color: var(--cd-teal); background: none; border: 0; cursor: pointer; }
+.pf-link:hover { text-decoration: underline; }
+
+@media (max-width: 1100px) {
+  .pf-layout { gap: 56px; }
+  .pf-photo { width: 220px; height: 220px; }
+  .pf-side { width: 240px; }
+}
+@media (max-width: 860px) {
+  .pf-layout { flex-direction: column; align-items: center; gap: 28px; }
+  .pf-form { width: 100%; max-width: 620px; }
+  .pf-main { padding-top: 40px; }
+  .pf-form .ant-form-item-row { flex-direction: column; align-items: stretch; }
+  .pf-form .ant-form-item-label { flex: none !important; padding-bottom: 4px; text-align: left; }
+  .pf-pw-toggle, .pf-error { margin-left: 0; }
+}
+
+/* "Are you sure?" window (drawn outside the page, so it has its own colours) */
+.pf-modal .ant-modal-container { padding: 26px 28px 24px; border-radius: 20px; }
+.pf-modal .ant-modal-title { font-size: 20px; font-weight: 700; color: #12949a; }
+.pf-modal-text { margin: 0 0 10px; font-size: 16px; line-height: 1.5; color: #333; }
+.pf-modal-list { margin: 0 0 4px; padding-left: 22px; font-size: 15px; font-weight: 700; color: #12949a; }
+.pf-modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px; }
+.pf-modal-no,
+.pf-modal-yes {
+  padding: 9px 22px;
+  font: inherit;
+  font-size: 16px;
   font-weight: 700;
-  color: #fff;
-  background: var(--cd-teal);
   border-radius: 999px;
   cursor: pointer;
 }
-.pf-upload-btn:hover { background: #0d7a7f; }
-.pf-upload-remove { margin-left: 12px; padding: 0; font: inherit; color: #c0392b; background: none; border: 0; cursor: pointer; }
-.pf-upload-remove:hover { text-decoration: underline; }
-.pf-upload-hint { margin-top: 6px; font-size: 13px; color: #777; }
-.pf-upload-error { margin-top: 4px; font-size: 13px; color: #c0392b; }
-.pf-two { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; }
-.pf-section-title { margin: 6px 0 12px; padding-top: 14px; font-weight: 700; color: var(--cd-teal); border-top: 1px solid #e3e3e3; }
-.pf-actions { display: flex; justify-content: flex-end; gap: 10px; }
-.pf-save.ant-btn-primary { background: var(--cd-teal); }
-.pf-save.ant-btn-primary:hover { background: #0d7a7f !important; }
-
-@media (max-width: 900px) {
-  .pf-grid { grid-template-columns: 1fr; }
-  .pf-card { min-height: 0; }
-}
-@media (max-width: 520px) {
-  .pf-summary-row { flex-direction: column; align-items: center; }
-  .pf-summary-text { padding-top: 0; text-align: center; }
-  .pf-info dl { grid-template-columns: 1fr; gap: 4px 0; }
-  .pf-info dd { margin-bottom: 14px; }
-  .pf-two { grid-template-columns: 1fr; }
-}
+.pf-modal-no { color: #12949a; background: transparent; border: 2px solid #12949a; }
+.pf-modal-no:hover:not(:disabled) { background: #e4f6f7; }
+.pf-modal-yes { color: #fff; background: #12949a; border: 2px solid #12949a; }
+.pf-modal-yes:hover:not(:disabled) { background: #0d7a7f; border-color: #0d7a7f; }
+.pf-modal-no:disabled, .pf-modal-yes:disabled { opacity: 0.6; cursor: not-allowed; }

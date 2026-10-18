@@ -181,7 +181,7 @@ function Receipt() {
         title="Book another room?"
         footer={
           <div className="rc-modal-actions">
-            <button type="button" className="btn btn-outline-teal" onClick={() => navigate('/')}>No</button>
+            <button type="button" className="btn btn-outline-teal" onClick={() => navigate('/')}>Back to Home</button>
             <button type="button" className="btn btn-pink" onClick={() => navigate('/book/room/pet-details')}>Yes, book another</button>
           </div>
         }

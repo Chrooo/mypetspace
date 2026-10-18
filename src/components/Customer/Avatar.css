@@ -1,0 +1,12 @@
+/* Profile picture used in the top bar of every customer page and on My Profile.
+   It fills whatever round box it is placed in (.cd-avatar or .pf-photo). */
+.cd-avatar-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* picture shown until the customer uploads their own (sky, cloud and hills) */
+.cd-avatar-default {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, #bfe7ff 0%, #e9f8ff 70%, #f6fcff 100%);
+}
+.cd-avatar-default svg { display: block; width: 100%; height: 100%; }
