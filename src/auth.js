@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import axios from 'axios';
 
 // Same server as the lesson (port 8000)
@@ -24,7 +25,25 @@ export const saveLogin = ({ token, user }) => {
   setHeader(token);
 };
 // keep the saved user in sync after the profile is edited (the token stays the same)
-export const saveUser = (user) => localStorage.setItem('user', JSON.stringify(user));
+export const saveUser = (user) => {
+  localStorage.setItem('user', JSON.stringify(user));
+  window.dispatchEvent(new Event('mps-user-updated')); // tells every header to show the new photo / name
+};
+
+// the logged-in user; the component re-renders by itself when the profile is saved (e.g. a new photo)
+export const useUser = () => {
+  const [user, setUser] = useState(getUser);
+  useEffect(() => {
+    const sync = () => setUser(getUser());
+    window.addEventListener('mps-user-updated', sync);
+    window.addEventListener('storage', sync); // another browser tab
+    return () => {
+      window.removeEventListener('mps-user-updated', sync);
+      window.removeEventListener('storage', sync);
+    };
+  }, []);
+  return user;
+};
 export const logout = () => {
   localStorage.removeItem('token');
   localStorage.removeItem('user');

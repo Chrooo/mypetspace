@@ -3,8 +3,9 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { Alert, Spin } from 'antd';
 import { ArrowLeftOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons';
-import { API_URL, getUser } from '../../auth';
+import { API_URL, useUser } from '../../auth';
 import logo from '../../assets/logo.png';
+import { HeaderAvatar } from './Avatar';
 import './CustomerDashboard.css'; // top bar styles are shared with the dashboard
 import './MyBookings.css'; // the table and pagination look the same as My Bookings
 import './MyPayments.css';
@@ -69,7 +70,7 @@ const pageItems = (current, total) => {
 };
 
 function MyPayments() {
-  const user = getUser();
+  const user = useUser();
   const [page, setPage] = useState(1);
   const [data, setData] = useState(null); // null = still loading
   const [error, setError] = useState('');
@@ -122,16 +123,7 @@ function MyPayments() {
         <Link to="/account" className="mb-back" aria-label="Back to dashboard">
           <ArrowLeftOutlined />
         </Link>
-        <Link to="/account/profile" className="cd-avatar" aria-label="My profile">
-          {user?.avatar ? (
-            <img src={user.avatar} alt="" className="cd-avatar-img" />
-          ) : (
-            <>
-              <span className="cd-avatar-sky" />
-              <span className="cd-avatar-hill" />
-            </>
-          )}
-        </Link>
+        <HeaderAvatar user={user} />
       </header>
 
       <main className="mb-main">

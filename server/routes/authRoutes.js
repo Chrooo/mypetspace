@@ -16,6 +16,7 @@ const { protect, authorize } = require('../middleware/authMiddleware');
 router.post('/register', authController.register);
 router.post('/login', authController.login);
 router.get('/check-identifier', authController.checkIdentifier);
+router.get('/check-username', protect, authController.checkUsername);
 router.get('/me', protect, authController.getMe);
 router.put('/me', protect, authController.updateMe);
 // my pets (the pets you registered)

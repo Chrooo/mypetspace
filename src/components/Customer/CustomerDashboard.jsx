@@ -1,8 +1,11 @@
+import { useEffect } from 'react';
+import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { LogoutOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
 import { getUser } from '../../auth';
 import confirmLogout from '../Auth/confirmLogout';
 import logo from '../../assets/logo.png';
+import { HeaderAvatar } from './Avatar';
 import './CustomerDashboard.css';
 
 /* ---------- big teal icons for the cards ---------- */
@@ -62,7 +65,15 @@ const CARDS = [
 
 function CustomerDashboard() {
   const navigate = useNavigate();
-  const user = getUser(); // the route guard makes sure a user exists
+  const user = useUser(); // the route guard makes sure a user exists
+
+  // keep the photo and name in the top bar in step with the database (e.g. changed on another device)
+  useEffect(() => {
+    axios
+      .get(`${API_URL}/me`)
+      .then(({ data }) => saveUser(data.user))
+      .catch(() => {}); // fall back to the saved copy
+  }, []);
 
   const handleLogout = () => confirmLogout(() => navigate('/'));
 
@@ -73,16 +84,10 @@ function CustomerDashboard() {
           <img src={logo} alt="My Pet Space" className="cd-logo" />
         </Link>
         <span className="cd-top-title">User Dashboard</span>
-        <Link to="/account/profile" className="cd-avatar" aria-label="My profile">
-          {user.avatar ? (
-            <img src={user.avatar} alt="" className="cd-avatar-img" />
-          ) : (
-            <>
-              <span className="cd-avatar-sky" />
-              <span className="cd-avatar-hill" />
-            </>
-          )}
+        <Link to="/" className="cd-back" aria-label="Back to the home page">
+          <ArrowLeftOutlined />
         </Link>
+        <HeaderAvatar user={user} />
       </header>
 
       <main className="cd-main">

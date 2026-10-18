@@ -16,6 +16,17 @@ const cleanIdentifier = (value = '') => {
   return /^09\d{9}$/.test(phone) ? phone : null;
 };
 
+const isEmail = (value = '') => EMAIL_RE.test(String(value).trim());
+const cleanEmail = (value = '') => {
+  const v = String(value).trim().toLowerCase();
+  return EMAIL_RE.test(v) ? v : null;
+};
+const cleanPhone = (value = '') => {
+  const v = String(value).trim().replace(/[\s-]/g, '').replace(/^\+63/, '0');
+  return /^09\d{9}$/.test(v) ? v : null;
+};
+const USERNAME_RE = /^[a-z0-9._]{3,20}$/;
+
 // returns an error message, or null if everything is fine
 const NAME_RE = /^[A-Za-z\u00C0-\u024F][A-Za-z\u00C0-\u024F .'-]*$/;
 
@@ -193,7 +204,21 @@ const checkIdentifier = async (req, res) => {
   try {
     const identifier = cleanIdentifier(req.query.identifier);
     if (!identifier) return res.json({ available: true }); // wrong format is reported by the form itself
-    res.json({ available: !(await UserModel.exists({ identifier })) });
+    // an email / phone also counts as taken when somebody saved it as their extra e-mail / contact number
+    const taken = await UserModel.exists({ $or: [{ identifier }, { email: identifier }, { contactNumber: identifier }] });
+    res.json({ available: !taken });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+// GET /api/check-username?username=...  (logged in) - "already taken" while typing on My Profile
+const checkUsername = async (req, res) => {
+  try {
+    const username = String(req.query.username || '').trim().toLowerCase();
+    if (!username) return res.json({ available: true });
+    res.json({ available: !(await UserModel.exists({ username, _id: { $ne: req.user._id } })) });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Internal Server Error' });
@@ -209,8 +234,9 @@ const getMe = async (req, res) => {
   res.json({ user: req.user });
 };
 
-// PUT /api/me  (any logged-in user) - edit your OWN name, email/phone, photo and password
-// Changing the email/phone or the password needs the current password.
+// PUT /api/me  (any logged-in user) - edit your OWN username, name, e-mail, contact number, photo and password
+// The login (email or phone) is the one the account was registered with: changing THAT one, or the
+// password, needs the current password. The other one is just an extra detail and can be saved freely.
 // The role is never read from req.body.
 const updateMe = async (req, res) => {
   try {
@@ -219,6 +245,8 @@ const updateMe = async (req, res) => {
 
     const body = req.body || {};
     const changes = [];
+    const taken = (message) => res.status(409).json({ message });
+    const takenMessage = 'An account with this email or phone already exists.';
 
     // names
     const firstName = body.firstName === undefined ? user.firstName : String(body.firstName).trim();
@@ -232,19 +260,81 @@ const updateMe = async (req, res) => {
     }
     if (firstName !== user.firstName || lastName !== user.lastName) changes.push('name');
 
-    // email / phone
+    // username (optional, '' removes it)
+    let username = user.username || '';
+    if (body.username !== undefined) {
+      const value = String(body.username).trim().toLowerCase();
+      if (value && !USERNAME_RE.test(value)) {
+        return res.status(400).json({
+          message: 'Username must be 3 to 20 characters: letters, numbers, periods and underscores only.',
+        });
+      }
+      if (value !== username) {
+        if (value && (await UserModel.exists({ username: value, _id: { $ne: user._id } }))) {
+          return taken('This username is already taken.');
+        }
+        username = value;
+        changes.push('username');
+      }
+    }
+
+    // email / contact number. The one the account logs in with can never be empty.
+    const loginIsEmail = isEmail(user.identifier);
+    const currentEmail = user.email || (loginIsEmail ? user.identifier : '');
+    const currentPhone = user.contactNumber || (loginIsEmail ? '' : user.identifier);
+    let email = currentEmail;
+    let contactNumber = currentPhone;
     let identifier = user.identifier;
+
+    // older way (Groomer profile): one box that holds the login email OR phone
     if (body.identifier !== undefined) {
       const cleaned = cleanIdentifier(body.identifier);
       if (!cleaned) return res.status(400).json({ message: 'Enter a valid email or a mobile number like 09123456789.' });
-      if (cleaned !== user.identifier) {
-        if (await UserModel.exists({ identifier: cleaned, _id: { $ne: user._id } })) {
-          return res.status(409).json({ message: 'An account with this email or phone already exists.' });
-        }
+      if (cleaned !== identifier) {
         identifier = cleaned;
-        changes.push('email/phone');
+        if (isEmail(cleaned)) email = cleaned;
+        else contactNumber = cleaned;
       }
     }
+
+    if (body.email !== undefined) {
+      const raw = String(body.email).trim();
+      if (!raw) {
+        if (loginIsEmail) return res.status(400).json({ message: 'Your email is your login, so it cannot be empty.' });
+        email = '';
+      } else {
+        const cleaned = cleanEmail(raw);
+        if (!cleaned) return res.status(400).json({ message: 'Enter a valid email address.' });
+        email = cleaned;
+        if (loginIsEmail) identifier = cleaned;
+      }
+    }
+
+    if (body.contactNumber !== undefined) {
+      const raw = String(body.contactNumber).trim();
+      if (!raw) {
+        if (!loginIsEmail) return res.status(400).json({ message: 'Your mobile number is your login, so it cannot be empty.' });
+        contactNumber = '';
+      } else {
+        const cleaned = cleanPhone(raw);
+        if (!cleaned) return res.status(400).json({ message: 'Enter a valid mobile number like 09123456789.' });
+        contactNumber = cleaned;
+        if (!loginIsEmail) identifier = cleaned;
+      }
+    }
+
+    // none of them may belong to somebody else
+    for (const value of new Set([identifier, email, contactNumber])) {
+      if (!value) continue;
+      const isNew = value !== user.identifier && value !== currentEmail && value !== currentPhone;
+      if (!isNew) continue;
+      if (await UserModel.exists({ _id: { $ne: user._id }, $or: [{ identifier: value }, { email: value }, { contactNumber: value }] })) {
+        return taken(takenMessage);
+      }
+    }
+    if (identifier !== user.identifier) changes.push('email/phone');
+    if (email !== currentEmail && !(loginIsEmail && identifier !== user.identifier)) changes.push('email');
+    if (contactNumber !== currentPhone && !(!loginIsEmail && identifier !== user.identifier)) changes.push('contact number');
 
     // photo ('' removes it)
     let avatar = user.avatar || '';
@@ -288,6 +378,9 @@ const updateMe = async (req, res) => {
     user.firstName = firstName;
     user.lastName = lastName;
     user.identifier = identifier;
+    user.email = email;
+    user.contactNumber = contactNumber;
+    user.username = username || undefined; // undefined removes it, so the unique index ignores empty usernames
     user.avatar = avatar;
     await user.save();
     await logAction('Profile Updated', user, { affected: `Changed: ${changes.join(', ')}` });
@@ -295,6 +388,9 @@ const updateMe = async (req, res) => {
     res.json({ user, message: 'Your profile was updated.' });
   } catch (err) {
     if (err && err.code === 11000) {
+      if (err.keyPattern && err.keyPattern.username) {
+        return res.status(409).json({ message: 'This username is already taken.' });
+      }
       return res.status(409).json({ message: 'An account with this email or phone already exists.' });
     }
     console.error(err);
