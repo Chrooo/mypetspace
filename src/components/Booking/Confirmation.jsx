@@ -237,7 +237,7 @@ function GroomingConfirmation({ type }) {
 
 // ---------- room booking ----------
 // What the earlier steps remembered: pet, room, dates, time, hours (Day Boarding), slot
-const ROOM_NAMES = ['pet', 'room', 'dates', 'time', 'hours', 'slot'];
+const ROOM_NAMES = ['pet', 'room', 'dates', 'time', 'outTime', 'hours', 'slot'];
 const clearRoomBooking = (type) => {
   try {
     ROOM_NAMES.forEach((n) => sessionStorage.removeItem(key(type, n)));
@@ -257,6 +257,7 @@ function RoomConfirmation({ type }) {
       room: findRoom(readSaved(key(type, 'room'))),
       dates: dates && dates.start && dates.end ? dates : null,
       time: readSaved(key(type, 'time')),
+      outTime: readSaved(key(type, 'outTime')),
       hours: Number(readSaved(key(type, 'hours'))) || null,
       slot: Number(readSaved(key(type, 'slot'))) || null,
     };
@@ -270,7 +271,7 @@ function RoomConfirmation({ type }) {
   const [slotError, setSlotError] = useState(''); // the slot was taken while the customer was confirming
   const [booked, setBooked] = useState(false);
 
-  const complete = !!draft.petId && !!draft.room && !!draft.dates && !!draft.time && !!draft.slot;
+    const complete = !!draft.petId && !!draft.room && !!draft.dates && !!draft.time && !!draft.outTime && !!draft.slot;
 
   useEffect(() => {
     if (!complete) return undefined;
@@ -294,20 +295,20 @@ function RoomConfirmation({ type }) {
   // the earlier steps must be done first
   if (!draft.petId) return <Navigate to={`/book/${type}/pet-details`} replace />;
   if (!draft.room || !draft.dates) return <Navigate to={`/book/${type}/services`} replace />;
-  if (!draft.time || !draft.slot) return <Navigate to={`/book/${type}/slot`} replace />;
+  if (!draft.time || !draft.outTime || !draft.slot) return <Navigate to={`/book/${type}/services`} replace />;
 
   const { room, dates } = draft;
   const isDay = room.kind === 'day';
   const nights = dayjs(dates.end).diff(dayjs(dates.start), 'day');
-  const total = stayTotal(room, nights, draft.hours);
   const startHour = Number(draft.time.slice(0, 2));
+  const endHour = Number(draft.outTime.slice(0, 2));
+  const total = stayTotal(room, nights, endHour - startHour);
   const dateText = isDay
     ? dayjs(dates.start).format('MMMM D, YYYY')
     : `${dayjs(dates.start).format('MMMM D')} - ${dayjs(dates.end).format('MMMM D, YYYY')} (${nights} ${nights === 1 ? 'night' : 'nights'})`;
   const timeText = isDay
-    ? `${hourLabel(startHour)} - ${hourLabel(startHour + draft.hours)} (${draft.hours} hours)`
-    : `Check-in ${hourLabel(startHour)}`;
-
+    ? `${hourLabel(startHour)} - ${hourLabel(endHour)} (${endHour - startHour} hours)`
+    : `Check-in ${hourLabel(startHour)}, check-out ${hourLabel(endHour)}`;
   const onConfirm = async () => {
     setSubmitting(true);
     setSubmitError('');
@@ -319,7 +320,7 @@ function RoomConfirmation({ type }) {
         start: dates.start,
         end: dates.end,
         time: draft.time,
-        hours: isDay ? draft.hours : undefined,
+        outTime: draft.outTime,
       });
       clearRoomBooking(type);
       setBooked(true);
@@ -353,7 +354,7 @@ function RoomConfirmation({ type }) {
       }
     >
       {petError && <Alert type="error" showIcon title={petError} className="cf-alert" action={<Link to={`/book/${type}/pet-details`}>Choose a pet</Link>} />}
-      {slotError && <Alert type="error" showIcon title={slotError} className="cf-alert" action={<Link to={`/book/${type}/slot`}>Choose another slot</Link>} />}
+      {slotError && <Alert type="error" showIcon title={slotError} className="cf-alert" action={<Link to={`/book/${type}/services`}>Choose another slot</Link>} />}
       {submitError && <Alert type="error" showIcon title={submitError} className="cf-alert" />}
 
       <section className="cf-card">

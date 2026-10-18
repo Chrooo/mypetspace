@@ -12,7 +12,7 @@ const OPEN_HOUR = 7; // earliest check-in / day boarding start
 const LAST_CHECKIN_HOUR = 19; // latest overnight check-in
 const CLOSE_HOUR = 20; // day boarding must end by 8:00 pm
 const MIN_DAY_HOURS = 3;
-const MAX_DAY_HOURS = 10;
+const MAX_DAY_HOURS = 12;
 const MAX_NIGHTS = 30;
 
 // maxPets = number of slots (squares) in that room type, one pet per slot
@@ -49,9 +49,10 @@ const hourOf = (time) => {
 
 // Works out what a stay takes up.
 // strict = false -> only the dates matter (used to show which rooms still have space)
-// strict = true  -> time and hours are checked too (used for the slot page and when saving)
-// returns { error } or { cells, nights, hours, checkIn, total }
-const buildStay = (room, { start, end, time, hours }, strict) => {
+// strict = true  -> the check-in and check-out times are checked too (slots pop-up and saving)
+// time = check-in "HH:00", outTime = check-out "HH:00"
+// returns { error } or { cells, nights, hours, checkIn, checkOut, total }
+const buildStay = (room, { start, end, time, outTime }, strict) => {
   if (!isValidDate(start) || !isValidDate(end)) return { error: 'Choose your check-in and check-out dates.' };
   if (start < todayPH()) return { error: 'That date has already passed. Please choose another date.' };
 
@@ -60,18 +61,22 @@ const buildStay = (room, { start, end, time, hours }, strict) => {
     if (!strict) return { cells: [], nights: 0 };
 
     const from = hourOf(time);
-    const len = Number(hours);
-    if (from === null || from < OPEN_HOUR) return { error: 'Choose a start time.' };
-    if (!Number.isInteger(len) || len < MIN_DAY_HOURS || len > MAX_DAY_HOURS) {
-      return { error: `Day Boarding is ${MIN_DAY_HOURS} to ${MAX_DAY_HOURS} hours.` };
+    const to = hourOf(outTime);
+    if (from === null || from < OPEN_HOUR || from > LAST_CHECKIN_HOUR) return { error: 'Choose a check-in time.' };
+    if (to === null || to < OPEN_HOUR || to > CLOSE_HOUR) return { error: 'Choose a check-out time.' };
+    const len = to - from;
+    if (len < MIN_DAY_HOURS || len > MAX_DAY_HOURS) {
+      return { error: `Day Boarding is ${MIN_DAY_HOURS} to ${MAX_DAY_HOURS} hours. Choose a later check-out time.` };
     }
-    if (from + len > CLOSE_HOUR) return { error: 'Day Boarding must end by 8:00 pm. Choose an earlier time or fewer hours.' };
 
     const cells = [];
-    for (let h = from; h < from + len; h += 1) cells.push(`${start}@${pad(h)}`);
+    for (let h = from; h < to; h += 1) cells.push(`${start}@${pad(h)}`);
     const checkIn = slotMoment(start, `${pad(from)}:00`);
     if (checkIn.getTime() <= Date.now()) return { error: 'That time has already passed. Please choose another time.' };
-    return { cells, nights: 0, hours: len, checkIn, total: room.price + room.extraHour * (len - MIN_DAY_HOURS) };
+    return {
+      cells, nights: 0, hours: len, checkIn, checkOut: slotMoment(end, `${pad(to)}:00`),
+      total: room.price + room.extraHour * (len - MIN_DAY_HOURS),
+    };
   }
 
   // overnight rooms: the nights are check-in day up to (not including) check-out day
@@ -83,10 +88,12 @@ const buildStay = (room, { start, end, time, hours }, strict) => {
   if (!strict) return { cells, nights, total };
 
   const from = hourOf(time);
+  const to = hourOf(outTime);
   if (from === null || from < OPEN_HOUR || from > LAST_CHECKIN_HOUR) return { error: 'Choose a check-in time.' };
+  if (to === null || to < OPEN_HOUR || to > CLOSE_HOUR) return { error: 'Choose a check-out time.' };
   const checkIn = slotMoment(start, `${pad(from)}:00`);
   if (checkIn.getTime() <= Date.now()) return { error: 'That time has already passed. Please choose another time.' };
-  return { cells, nights, checkIn, total };
+  return { cells, nights, checkIn, checkOut: slotMoment(end, `${pad(to)}:00`), total };
 };
 
 // Day Boarding: is there any slot-hour run of MIN_DAY_HOURS free? (takenHours = hours already booked)
@@ -99,7 +106,7 @@ const hasFreeWindow = (takenHours) => {
   return false;
 };
 
-   module.exports = {
-     ROOM_TYPES, findRoom, buildStay, hasFreeWindow, addDays, dayDiff, todayPH,
-     OPEN_HOUR, LAST_CHECKIN_HOUR, CLOSE_HOUR, MIN_DAY_HOURS, MAX_DAY_HOURS,
-   };
+module.exports = {
+  ROOM_TYPES, findRoom, buildStay, hasFreeWindow, addDays, dayDiff, todayPH,
+  OPEN_HOUR, LAST_CHECKIN_HOUR, CLOSE_HOUR, MIN_DAY_HOURS, MAX_DAY_HOURS,
+};

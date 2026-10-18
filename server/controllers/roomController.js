@@ -66,8 +66,8 @@ const getSlots = async (req, res) => {
     const room = findRoom(String(req.query.roomId || ''));
     if (!room) return res.status(404).json({ message: 'Room type not found.' });
 
-    const { start, end, time, hours } = req.query;
-    const stay = buildStay(room, { start: String(start || ''), end: String(end || ''), time, hours }, room.kind === 'day');
+    const { start, end, time, outTime } = req.query;
+    const stay = buildStay(room, { start: String(start || ''), end: String(end || ''), time, outTime }, room.kind === 'day');
     if (stay.error) return res.status(400).json({ message: stay.error });
 
     const taken = await takenSlots(room, stay.cells);
@@ -82,7 +82,7 @@ const getSlots = async (req, res) => {
 // body: { petId, roomId, slot, start, end, time, hours? }
 const createReservation = async (req, res) => {
   try {
-    const { petId, roomId, slot, start, end, time, hours } = req.body || {};
+        const { petId, roomId, slot, start, end, time, outTime } = req.body || {};
 
     if (!mongoose.isValidObjectId(petId)) return res.status(400).json({ message: 'Choose a pet.' });
     const pet = await PetModel.findOne({ _id: petId, owner: req.user._id }); // only YOUR pets
@@ -96,7 +96,7 @@ const createReservation = async (req, res) => {
       return res.status(400).json({ message: 'Choose a slot.' });
     }
 
-    const stay = buildStay(room, { start: String(start || ''), end: String(end || ''), time, hours }, true);
+        const stay = buildStay(room, { start: String(start || ''), end: String(end || ''), time, outTime }, true);
     if (stay.error) return res.status(400).json({ message: stay.error });
 
     // the same pet cannot be in two rooms at the same time
@@ -123,6 +123,7 @@ const createReservation = async (req, res) => {
         startDate: start,
         endDate: end,
         checkInAt: stay.checkIn,
+        checkOutAt: stay.checkOut,
         hours: stay.hours,
         nights: stay.nights,
         cells: stay.cells,
