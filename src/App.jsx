@@ -33,7 +33,7 @@ import MyReservations from './components/Customer/MyReservations';
 import MyAppointments from './components/Customer/MyAppointments';
 import MyPets from './components/Customer/MyPets';
 import MyPayments from './components/Customer/MyPayments'
-import MyBookings from './components/Customer/MyBookings';;
+import MyBookings from './components/Customer/MyBookings';
 
 // groomer
 import GroomerDashboard from './components/Groomer/GroomerDashboard';
@@ -102,6 +102,7 @@ function App() {
         <Route path="/account/reservations" element={<MyReservations />} />
         <Route path="/account/appointments" element={<MyAppointments />} />
         <Route path="/account/pets" element={<MyPets />} />
+        <Route path="/account/bookings" element={<MyBookings />} />
         <Route path="/account/payments" element={<MyPayments />} />
       </Route>
 

@@ -4,6 +4,8 @@ const authController = require('../controllers/authController');
 const petController = require('../controllers/petController');
 const appointmentController = require('../controllers/appointmentController');
 const roomController = require('../controllers/roomController');
+const myBookingsController = require('../controllers/myBookingsController');
+const paymentsController = require('../controllers/paymentsController');
 const twoFactor = require('../controllers/twoFactorController');
 const adminController = require('../controllers/adminController');
 const groomerController = require('../controllers/groomerController');
@@ -21,6 +23,13 @@ router.get('/pets', protect, petController.listMyPets);
 router.post('/pets', protect, petController.createPet);
 router.post('/pets/delete', protect, petController.deletePets);
 router.put('/pets/:id', protect, petController.updatePet);
+
+// my bookings: every hotel reservation and grooming appointment of the logged-in customer
+router.get('/my/bookings', protect, authorize('customer'), myBookingsController.listMyBookings);
+// my payments and receipts (the receipt of a hotel booking is saved right after Pay Now)
+router.get('/my/payments', protect, authorize('customer'), paymentsController.listMyPayments);
+router.post('/my/payments/receipt', protect, authorize('customer'), paymentsController.saveRoomReceipt);
+router.get('/receipts/:id', protect, authorize('customer', 'staff', 'admin'), paymentsController.getReceipt);
 
 // booking: which time slots are still open on a date (same roles that can open the booking pages)
 router.get('/appointments/availability', protect, authorize('customer', 'staff', 'admin'), appointmentController.getAvailability);

@@ -1,32 +1,77 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import axios from 'axios';
 import dayjs from 'dayjs';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Modal } from 'antd';
+import { Modal, Spin } from 'antd';
 import PageShell from '../Layout/PageShell';
 import logo from '../../assets/logo.png';
-import { readReceipt } from './receiptData';
+import { API_URL } from '../../auth';
+import { readReceipt, syncReceipt } from './receiptData';
 import './Receipt.css';
 
 const peso = (n) => `₱${n.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const TBC = 'To be confirmed by the shop';
 
-// The receipt made when "Pay Now" is pressed (see Booking/Payment.jsx and receiptData.js).
-// Print / Save as PDF opens the print window; when it closes, the "book another?" pop-up appears.
-// Opened from My Payments and Payments and Receipts with another id (like "sample"), it still shows
-// the planned page, because nothing saves receipts on the server yet.
+// The receipt of a booking.
+//  - Right after "Pay Now" it is read from this browser tab (see Booking/Payment.jsx and receiptData.js) and
+//    saved on the server. Print / Save as PDF opens the print window; when it closes, the "book another?"
+//    pop-up appears.
+//  - Opened later (from My Payments, or on another device) it is loaded from the server.
+//  - An id the server does not know (like "sample") shows the planned page.
 function Receipt() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const receipt = readReceipt(id);
+  const local = useMemo(() => readReceipt(id), [id]); // made in this tab, just now
+  const [fetched, setFetched] = useState({ id: null, receipt: null }); // loaded from the server
   const [askAnother, setAskAnother] = useState(false);
+
+  // not in this tab: ask the server for it
+  useEffect(() => {
+    if (local) return undefined;
+    let active = true;
+    axios
+      .get(`${API_URL}/receipts/${encodeURIComponent(id)}`)
+      .then(({ data }) => active && setFetched({ id, receipt: data.receipt }))
+      .catch(() => active && setFetched({ id, receipt: null }));
+    return () => {
+      active = false;
+    };
+  }, [id, local]);
+
+  // made in this tab: save the payment on the server (3 tries, in case the connection drops for a moment)
+  useEffect(() => {
+    if (!local || !local.reservationId) return undefined;
+    let stopped = false;
+    let timer;
+    const attempt = (n) =>
+      syncReceipt(local).catch(() => {
+        if (!stopped && n < 3) timer = setTimeout(() => attempt(n + 1), 3000);
+      });
+    attempt(1);
+    return () => {
+      stopped = true;
+      clearTimeout(timer);
+    };
+  }, [local]);
 
   // the print / save window was closed -> ask if the customer wants to book another room
   useEffect(() => {
-    if (!receipt) return undefined;
+    if (!local) return undefined;
     const onAfterPrint = () => setAskAnother(true);
     window.addEventListener('afterprint', onAfterPrint);
     return () => window.removeEventListener('afterprint', onAfterPrint);
-  }, [receipt]);
+  }, [local]);
+
+  const receipt = local || (fetched.id === id ? fetched.receipt : null);
+  const loading = !local && fetched.id !== id;
+
+  if (loading) {
+    return (
+      <PageShell title="Receipt" subtitle="Loading your receipt...">
+        <div style={{ padding: '40px 0', textAlign: 'center' }}><Spin size="large" /></div>
+      </PageShell>
+    );
+  }
 
   if (!receipt) {
     return (
@@ -57,16 +102,25 @@ function Receipt() {
   const paid = typeof r.paid === 'number' ? r.paid : 0;
   const remaining = hasTotal ? Math.max(r.total - paid, 0) : null;
 
-  const rows = [
-    ['Room:', r.roomName],
-    ['Dates:', r.datesText],
-    ['Pet/s:', r.petText],
-    ['Slot:', `Slot ${r.slot}`],
-    ['Check-In:', r.checkIn],
-    ['Check-Out:', r.checkOut],
-    ['Price:', r.priceText],
-    ['Booking No.:', r.bookingNo],
-  ];
+  const rows =
+    r.kind === 'grooming'
+      ? [
+          ['Service:', r.serviceText],
+          ['Pet/s:', r.petText],
+          ['Appointment:', r.scheduleText],
+          ['Groomer:', r.groomerName || 'To be assigned'],
+          ['Booking No.:', r.bookingNo],
+        ]
+      : [
+          ['Room:', r.roomName],
+          ['Dates:', r.datesText],
+          ['Pet/s:', r.petText],
+          ['Slot:', `Slot ${r.slot}`],
+          ['Check-In:', r.checkIn],
+          ['Check-Out:', r.checkOut],
+          ['Price:', r.priceText],
+          ['Booking No.:', r.bookingNo],
+        ];
 
   return (
     <PageShell title="Receipt" subtitle="This is your receipt.">

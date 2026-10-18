@@ -1,0 +1,3 @@
+/* My Payments page: the table, pagination and top bar come from MyBookings.css and CustomerDashboard.css */
+.mb-status.is-partial { color: #d48806; }
+.mb-amount-sub { display: block; margin-top: 2px; font-size: 11px; font-weight: 500; }

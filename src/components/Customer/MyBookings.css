@@ -1,0 +1,109 @@
+/* My Bookings page (top bar styles come from CustomerDashboard.css) */
+.mb-back {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin-right: 14px;
+  font-size: 15px;
+  color: #fff;
+  background: var(--cd-teal);
+  border: 2px solid #fff;
+  border-radius: 50%;
+  text-decoration: none;
+}
+.mb-back:hover { background: #0d7a7f; }
+.cd-top .cd-top-title { margin-right: 18px; }
+.cd-avatar-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.mb-main { max-width: 1010px; margin: 0 auto; padding: 32px 24px 60px; }
+
+.mb-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+.mb-title { margin: 0 0 2px; font-size: clamp(26px, 4vw, 32px); font-weight: 700; letter-spacing: 0.3px; color: var(--cd-teal); }
+.mb-sub { margin: 0; font-size: 13px; font-weight: 700; color: var(--cd-teal); }
+
+/* "Live" badge */
+.mb-live { display: inline-flex; align-items: center; gap: 7px; padding-top: 8px; font-size: 12px; font-weight: 700; color: var(--cd-teal); white-space: nowrap; }
+.mb-live i { width: 9px; height: 9px; background: #1fb05a; border-radius: 50%; animation: mb-pulse 1.6s ease-in-out infinite; }
+.mb-live.is-off { color: #b3261e; }
+.mb-live.is-off i { background: #b3261e; animation: none; }
+@keyframes mb-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+.mb-alert { margin-bottom: 16px; }
+.mb-loading { padding: 40px 0; text-align: center; }
+.mb-empty { padding: 32px; text-align: center; color: #3b9a9f; background: #fff; border: 2px dashed var(--cd-teal); border-radius: 20px; }
+.mb-empty p { margin: 0 0 14px; font-weight: 700; }
+.mb-empty-actions { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+.mb-btn {
+  display: inline-block;
+  padding: 9px 22px;
+  font-size: 14px;
+  font-weight: 800;
+  color: #fff;
+  background: var(--cd-teal);
+  border-radius: 999px;
+  text-decoration: none;
+}
+.mb-btn:hover { background: #0d7a7f; color: #fff; }
+
+/* table */
+.mb-scroll { overflow-x: auto; }
+.mb-table { width: 100%; min-width: 760px; border-collapse: collapse; background: #fff; color: var(--cd-teal); font-size: 13px; }
+.mb-table th {
+  padding: 11px 8px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #fff;
+  text-align: center;
+  background: var(--cd-teal);
+  border: 1.5px solid var(--cd-teal);
+}
+.mb-table td { padding: 10px 8px; text-align: center; vertical-align: middle; border: 1.5px solid var(--cd-teal); }
+.mb-table tbody tr:hover td { background: #f1fbfb; }
+.mb-service b { display: block; font-size: 13px; font-weight: 800; }
+.mb-service small { display: block; margin-top: 2px; font-size: 11px; font-weight: 500; }
+
+.mb-view { padding: 0; font: inherit; color: var(--cd-teal); background: none; border: 0; cursor: pointer; text-decoration: none; }
+.mb-view:hover { text-decoration: underline; color: #0d7a7f; }
+
+/* status colors */
+.mb-status { font-weight: 600; }
+.mb-status.is-pending { color: #e8731a; }
+.mb-status.is-confirmed { color: #1668dc; }
+.mb-status.is-paid { color: #14a44d; }
+.mb-status.is-progress { color: #7a4cc2; }
+.mb-status.is-completed { color: #4a6b5a; }
+.mb-status.is-cancelled { color: #8c1238; }
+
+/* pagination */
+.mb-pager { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 16px; color: var(--cd-teal); }
+.mb-page, .mb-arrow {
+  min-width: 26px;
+  height: 26px;
+  padding: 0 4px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--cd-teal);
+  background: none;
+  border: 1.5px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.mb-page:hover, .mb-arrow:hover:not(:disabled) { background: #dff5f6; }
+.mb-page.is-on { border-color: var(--cd-teal); }
+.mb-arrow { font-size: 14px; }
+.mb-arrow:disabled { opacity: 0.35; cursor: not-allowed; }
+.mb-gap { font-weight: 800; }
+
+/* Details window */
+.mb-details { margin: 8px 0 0; }
+.mb-details div { display: flex; gap: 12px; padding: 8px 0; border-bottom: 1px solid #e3f1f2; }
+.mb-details div:last-child { border-bottom: 0; }
+.mb-details dt { flex: 0 0 120px; font-weight: 700; color: var(--cd-teal); }
+.mb-details dd { margin: 0; flex: 1; color: #2b4b4d; word-break: break-word; }
+
+@media (max-width: 640px) {
+  .mb-head { flex-direction: column; }
+  .mb-main { padding: 24px 12px 48px; }
+}
