@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import axios from 'axios';
-import { Alert, Button, Form, Input, Tooltip } from 'antd';
+import { Alert, Button, Form, Input } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import AdminLayout from './AdminLayout';
 import { Pills } from './AdminUI';
@@ -8,6 +8,29 @@ import { API_URL, checkAvailable } from '../../auth';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_RE = /^(\+63|0)9\d{9}$/;
+const MAX_PHOTO_MB = 5;
+
+// shrink the chosen photo to a 256x256 JPEG so it is small enough to save
+const resizePhoto = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('Could not read that file.'));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('That file is not a valid image.'));
+      img.onload = () => {
+        const size = 256;
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const side = Math.min(img.width, img.height); // center-crop to a square
+        canvas.getContext('2d').drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, size, size);
+        resolve(canvas.toDataURL('image/jpeg', 0.85));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
 
 const ROLES = [
   { label: 'STAFF', value: 'staff' },
@@ -38,19 +61,43 @@ function AdminRegister() {
   const [role, setRole] = useState('staff');
   const [saving, setSaving] = useState(false);
   const [result, setResult] = useState(null); // { type: 'success' | 'error', text }
+  const [photo, setPhoto] = useState(''); // the chosen picture (small data URL), '' = none
+  const [photoError, setPhotoError] = useState('');
+  const fileInput = useRef(null);
+
+  const onPickPhoto = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = ''; // lets the same file be picked again
+    if (!file) return;
+    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+      setPhotoError('Please choose a PNG, JPG or WEBP image.');
+      return;
+    }
+    if (file.size > MAX_PHOTO_MB * 1024 * 1024) {
+      setPhotoError(`The photo must be under ${MAX_PHOTO_MB} MB.`);
+      return;
+    }
+    try {
+      setPhoto(await resizePhoto(file));
+      setPhotoError('');
+    } catch (err) {
+      setPhotoError(err.message);
+    }
+  };
 
   const onFinish = async (values) => {
     setSaving(true);
     setResult(null);
     try {
       const { confirmPassword, ...account } = values;
-      const response = await axios.post(`${API_URL}/createStaff`, { ...account, role });
+      const response = await axios.post(`${API_URL}/createStaff`, { ...account, role, avatar: photo });
       const created = response.data.user;
       setResult({
         type: 'success',
         text: `${created.fullName} was created as ${role === 'staff' ? 'Hotel Staff' : 'Groomer'}. They log in with "${values.identifier}" and the password you entered.`,
       });
       form.resetFields();
+      setPhoto('');
     } catch (err) {
       setResult({ type: 'error', text: err.response?.data?.message || 'Could not reach the server. Please try again.' });
     } finally {
@@ -121,12 +168,17 @@ function AdminRegister() {
           </div>
 
           <div className="adm-reg-photo">
-            <div className="adm-reg-circle"><span /></div>
-            <Tooltip title="Coming soon">
-              <Button type="link" disabled icon={<UploadOutlined />} style={{ fontWeight: 800, fontSize: 18 }}>
-                Upload Image
+            <div className="adm-reg-circle">{photo ? <img src={photo} alt="Chosen photo" /> : <span />}</div>
+            <input ref={fileInput} type="file" accept="image/png,image/jpeg,image/webp" onChange={onPickPhoto} hidden />
+            <Button type="link" icon={<UploadOutlined />} onClick={() => fileInput.current?.click()} style={{ fontWeight: 800, fontSize: 18 }}>
+              Upload Image
+            </Button>
+            {photo && (
+              <Button type="link" onClick={() => setPhoto('')}>
+                Remove photo
               </Button>
-            </Tooltip>
+            )}
+            {photoError && <div className="adm-reg-photo-error">{photoError}</div>}
           </div>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeftOutlined, UserOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined } from '@ant-design/icons';
 import { getUser } from '../../auth';
 import logo from '../../assets/logo.png';
 import './AdminLayout.css';
@@ -22,11 +22,18 @@ function AdminLayout({ children }) {
           </button>
           <button
             className="adm-avatar"
-            aria-label="Profile and security"
-            title={user?.fullName ? `${user.fullName} - security settings` : 'Security settings'}
-            onClick={() => navigate('/security')}
+            aria-label="My profile"
+            title={user?.fullName ? `${user.fullName} - my profile` : 'My profile'}
+            onClick={() => navigate('/admin/profile')}
           >
-            <UserOutlined />
+            {user?.avatar ? (
+              <img src={user.avatar} alt="" className="adm-avatar-img" />
+            ) : (
+              <>
+                <span className="adm-avatar-sky" />
+                <span className="adm-avatar-hill" />
+              </>
+            )}
           </button>
         </div>
       </header>

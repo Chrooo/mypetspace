@@ -1,7 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Button, Tag } from 'antd';
 import { LogoutOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
-import { getUser, logout, roleHome, ROLE_LABELS } from '../../auth';
+import { getUser, roleHome, ROLE_LABELS } from '../../auth';
+import confirmLogout from '../Auth/confirmLogout';
 import logo from '../../assets/logo.png';
 import Planned from './Planned';
 import './Layout.css';
@@ -16,10 +17,7 @@ function DashboardShell({ title, subtitle, back, stats = [], items = [], planned
   const role = ROLE_LABELS[user.role] || ROLE_LABELS.customer;
   const backTo = back === true ? roleHome(user.role) : back;
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
+  const handleLogout = () => confirmLogout(() => navigate('/'));
 
   return (
     <div className="dash">

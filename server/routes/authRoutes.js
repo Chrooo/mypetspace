@@ -60,6 +60,7 @@ router.put('/staff/bookings/:id/payment', protect, authorize('staff', 'admin'), 
 
 router.post('/createStaff', protect, authorize('admin'), authController.createStaff);
 router.get('/users', protect, authorize('admin'), authController.listUsers);
+router.get('/users/:id', protect, authorize('admin'), authController.getUserById);
 router.get('/admin/summary', protect, authorize('admin'), adminController.getSummary);
 router.get('/admin/payments', protect, authorize('admin'), adminController.listPayments);
 router.get('/admin/audit-logs', protect, authorize('admin'), adminController.listAuditLogs);

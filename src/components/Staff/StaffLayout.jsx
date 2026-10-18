@@ -13,6 +13,7 @@ function StaffLayout({ children }) {
   const user = getUser();
   const home = roleHome(user?.role);
   const title = user?.role === 'admin' ? 'Admin Dashboard' : 'Staff Dashboard';
+  const profile = user?.role === 'admin' ? '/admin/profile' : '/staff/profile';
 
   return (
     <div className="sd">
@@ -25,7 +26,7 @@ function StaffLayout({ children }) {
           <button type="button" className="sd-back" aria-label="Back" onClick={() => navigate(-1)}>
             <ArrowLeftOutlined />
           </button>
-          <button type="button" className="sd-avatar" aria-label="Profile and security" onClick={() => navigate('/security')}>
+          <button type="button" className="sd-avatar" aria-label="My profile" title="My profile" onClick={() => navigate(profile)}>
             {user?.avatar ? (
               <img src={user.avatar} alt="" className="sd-avatar-img" />
             ) : (

@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { SearchOutlined } from '@ant-design/icons';
-import { getUser, logout } from '../../auth';
+import { getUser } from '../../auth';
+import confirmLogout from '../Auth/confirmLogout';
 import logo from '../../assets/logo.png';
 import './Layout.css';
 
@@ -17,11 +18,11 @@ function SiteHeader() {
   const navigate = useNavigate();
   const [user, setUser] = useState(getUser());
 
-  const handleLogout = () => {
-    logout();
-    setUser(null);
-    navigate('/');
-  };
+  const handleLogout = () =>
+    confirmLogout(() => {
+      setUser(null);
+      navigate('/');
+    });
 
   return (
     <header className="site-header">
