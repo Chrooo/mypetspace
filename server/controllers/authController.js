@@ -127,12 +127,23 @@ const createStaff = async (req, res) => {
       return res.status(409).json({ message: 'An account with this email or phone already exists.' });
     }
 
+    // optional photo (a small image data URL, same rules as the profile photo)
+    let avatar = '';
+    if (req.body.avatar) {
+      const value = String(req.body.avatar);
+      if (!AVATAR_RE.test(value) || value.length > MAX_AVATAR_CHARS) {
+        return res.status(400).json({ message: 'Photo must be a PNG, JPG or WEBP image under 200 KB.' });
+      }
+      avatar = value;
+    }
+
     const user = await UserModel.create({
       firstName: req.body.firstName,
       lastName: req.body.lastName,
       identifier,
       password: req.body.password,
       role: req.body.role,
+      avatar,
     });
     await logAction('Created new account', req.user, { affected: user.fullName });
 
@@ -163,10 +174,25 @@ const listUsers = async (req, res) => {
     if (req.query.sort === 'alphabetical') sort = { firstName: 1, lastName: 1 };
 
     const [users, total] = await Promise.all([
-      UserModel.find(filter).sort(sort).skip((page - 1) * pageSize).limit(pageSize),
+      UserModel.find(filter).select('-avatar').sort(sort).skip((page - 1) * pageSize).limit(pageSize),
       UserModel.countDocuments(filter),
     ]);
     res.json({ users, total, page, pageSize });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+// GET /api/users/:id  (admin only) - one account to view (a customer also comes with their pets)
+const getUserById = async (req, res) => {
+  try {
+    if (!require('mongoose').isValidObjectId(req.params.id)) return res.status(404).json({ message: 'User not found.' });
+    const user = await UserModel.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: 'User not found.' });
+
+    const pets = user.role === 'customer' ? await PetModel.find({ owner: user._id }).sort({ name: 1 }).select('name type breed') : [];
+    res.json({ user, pets });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Internal Server Error' });
@@ -372,4 +398,4 @@ const updateMe = async (req, res) => {
   }
 };
 
-module.exports = { register, login, createStaff, listUsers, checkIdentifier, checkUsername, getMe, updateMe };
+module.exports = { register, login, createStaff, listUsers, getUserById, checkIdentifier, getMe, updateMe };

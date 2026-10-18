@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeftOutlined, LogoutOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
-import { API_URL, logout, saveUser, useUser } from '../../auth';
+import { LogoutOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
+import { getUser } from '../../auth';
+import confirmLogout from '../Auth/confirmLogout';
 import logo from '../../assets/logo.png';
 import { HeaderAvatar } from './Avatar';
 import './CustomerDashboard.css';
@@ -74,10 +75,7 @@ function CustomerDashboard() {
       .catch(() => {}); // fall back to the saved copy
   }, []);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
+  const handleLogout = () => confirmLogout(() => navigate('/'));
 
   return (
     <div className="cd">

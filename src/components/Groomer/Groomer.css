@@ -12,36 +12,36 @@
 }
 
 /* ---------- top bar ---------- */
-.gr-top { display: flex; align-items: center; justify-content: flex-end; gap: 22px; height: 96px; padding: 0 6vw; background: var(--gr-tan); }
+.gr-top { display: flex; align-items: center; justify-content: flex-end; gap: 18px; height: 110px; padding: 0 6vw; background: var(--gr-tan); }
 .gr-top-logo { margin-right: auto; }
-.gr-logo { display: block; height: 72px; width: auto; mix-blend-mode: multiply; }
-.gr-top-title { font-size: 20px; font-weight: 700; }
-.gr-back { display: grid; place-items: center; width: 42px; height: 42px; padding: 0; font-size: 20px; color: #fff; background: none; border: 2.5px solid #fff; border-radius: 50%; cursor: pointer; }
-.gr-back:hover { background: rgba(255, 255, 255, 0.2); }
-.gr-avatar { position: relative; display: block; width: 52px; height: 52px; overflow: hidden; border: 2px solid #fff; border-radius: 50%; }
+.gr-logo { display: block; height: 76px; width: auto; mix-blend-mode: multiply; }
+.gr-top-title { font-size: 18px; font-weight: 700; }
+.gr-back { display: flex; padding: 0; font-size: 26px; color: #fff; background: none; border: 0; cursor: pointer; }
+.gr-avatar { position: relative; display: block; width: 38px; height: 38px; overflow: hidden; border: 2px solid #fff; border-radius: 50%; }
 .gr-avatar img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .gr-avatar-sky { position: absolute; inset: 0; background: #cfe9f5; }
 .gr-avatar-hill { position: absolute; left: -20%; right: -20%; bottom: -35%; height: 65%; background: #7aa83a; border-radius: 50%; }
 
 .gr-main { max-width: 1180px; margin: 0 auto; padding: 40px 28px 70px; }
-.gr-h1 { margin: 0 0 6px; font-size: clamp(30px, 4vw, 46px); font-weight: 700; line-height: 1.1; }
-.gr-sub { margin: 0 0 30px 8px; font-size: clamp(17px, 2vw, 22px); font-weight: 500; color: var(--gr-mid); }
+.gr-dash { max-width: 1010px; margin: 0 auto; }
+.gr-h1 { margin: 0 0 6px; font-size: clamp(26px, 4vw, 36px); font-weight: 700; line-height: 1.2; }
+.gr-sub { margin: 0 0 14px 6px; font-size: 17px; font-weight: 500; color: var(--gr-mid); }
 .gr-page-title { margin: 0 0 6px; font-size: clamp(28px, 4vw, 40px); font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
 .gr-hint { margin: 0 0 18px; font-size: 15px; color: var(--gr-mid); }
 
 /* ---------- dashboard cards ---------- */
-.gr-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px 60px; max-width: 1120px; }
+.gr-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 1fr; gap: 20px; }
 .gr-card {
-  display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 190px; padding: 28px 40px;
-  color: var(--gr-maroon); text-decoration: none; background: #fff; border: 3px solid var(--gr-tan); border-radius: 32px;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 120px; padding: 16px 20px 16px 24px;
+  color: var(--gr-maroon); text-decoration: none; background: #fff; border: 1.5px solid var(--gr-tan); border-radius: 14px;
   transition: transform 0.15s, box-shadow 0.15s;
 }
-.gr-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(198, 142, 118, 0.35); }
-.gr-card h2 { margin: 0 0 8px; font-size: clamp(26px, 3vw, 38px); font-weight: 800; letter-spacing: 0.5px; }
-.gr-card p { max-width: 260px; margin: 0; font-size: 16px; font-weight: 500; line-height: 1.4; color: var(--gr-mid); }
-.gr-card-icon { flex: none; width: 120px; height: 120px; color: var(--gr-tan); }
+.gr-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(198, 142, 118, 0.35); }
+.gr-card h2 { margin: 0 0 6px; font-size: 18px; font-weight: 700; }
+.gr-card p { margin: 0; font-size: 15px; line-height: 1.35; }
+.gr-card-icon { flex: none; width: 80px; height: 80px; color: var(--gr-tan); }
 .gr-card-icon svg { display: block; width: 100%; height: 100%; }
-.gr-footer { display: flex; align-items: center; justify-content: flex-end; gap: 28px; max-width: 1120px; margin-top: 18px; }
+.gr-footer { display: flex; align-items: center; justify-content: flex-end; gap: 28px; margin-top: 18px; }
 .gr-link { display: inline-flex; align-items: center; gap: 8px; padding: 0; font: inherit; font-size: 18px; font-weight: 700; color: var(--gr-maroon); background: none; border: 0; cursor: pointer; }
 .gr-link:hover { text-decoration: underline; }
 .gr-link.gr-logout { font-size: 20px; }
@@ -129,15 +129,13 @@
 .gr-edit-actions { display: flex; gap: 12px; }
 
 @media (max-width: 860px) {
-  .gr-top { height: 80px; gap: 14px; }
-  .gr-logo { height: 58px; }
-  .gr-cards { grid-template-columns: 1fr; gap: 20px; }
-  .gr-card { min-height: 150px; padding: 20px 24px; border-radius: 26px; }
-  .gr-card-icon { width: 84px; height: 84px; }
   .gr-pill-grid, .gr-pkg-grid { grid-template-columns: 1fr; }
   .gr-pf-grid, .gr-edit { grid-template-columns: 1fr; }
   .gr-pf-sum { flex-direction: column; align-items: center; text-align: center; }
 }
-@media (max-width: 520px) {
-  .gr-top-title { display: none; }
+@media (max-width: 600px) {
+  .gr-top { height: 84px; }
+  .gr-logo { height: 58px; }
+  .gr-top-title { font-size: 15px; }
+  .gr-cards { grid-template-columns: 1fr; }
 }
