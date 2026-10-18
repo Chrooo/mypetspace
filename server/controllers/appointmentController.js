@@ -114,7 +114,9 @@ const createAppointment = async (req, res) => {
 
     const slot = checkSlot(String(date || ''), String(time || ''));
     if (slot.error) return res.status(400).json({ message: slot.error });
-
+    // the same pet cannot have two appointments in the same hour
+    const petBusy = await Appointment.exists({ pet: pet._id, ...hourFilter(slot.at) });
+    if (petBusy) return res.status(409).json({ message: `${pet.name} already has an appointment at that time.` });
     // checked again here, in case the slot filled up while the customer was confirming
     const groomer = await findFreeGroomer(slot.at, mongoose.isValidObjectId(groomerId) ? groomerId : null);
     if (!groomer) return res.status(409).json({ message: FULL_MESSAGE });

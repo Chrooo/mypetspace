@@ -75,8 +75,12 @@ function PetDetails() {
   return (
     <BookingStep
       step="pet-details"
-      title={type === 'grooming' ? 'Book an Appointment' : 'Select Your Pet'}
-      subtitle={type === 'grooming' ? 'Select your preferred date, time, and groomer' : undefined}
+      title={type === 'grooming' ? 'Book an Appointment' : 'Book a Room'}
+      subtitle={
+        type === 'grooming'
+          ? 'Select your preferred date, time, and groomer'
+          : 'Choose the perfect room for your fur babies.'
+      }
       canNext={!!pet}
     >
       {loadError && <Alert type="error" showIcon title={loadError} className="bk-alert" />}

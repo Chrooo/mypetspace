@@ -5,11 +5,13 @@ import PageShell from '../Layout/PageShell';
 import Planned from '../Layout/Planned';
 
 // The order of the pages for each kind of booking.
-// A grooming appointment skips "additional-services" (only shown when a room is booked).
 // A grooming appointment ends at "confirmation" (no payment page, as in the design).
+// A room booking is 5 steps: the "services" page is the Room Type page (it also holds the
+// date range), then "slot" picks the check-in time and a free slot of that room type.
+// "additional-services" and "schedule" are not part of it.
 const FLOWS = {
   grooming: ['pet-details', 'services', 'schedule', 'confirmation'],
-  room: ['pet-details', 'services', 'additional-services', 'schedule', 'confirmation', 'payment'],
+  room: ['pet-details', 'services', 'slot', 'confirmation', 'payment'],
 };
 
 const STEP_LABELS = {
@@ -17,9 +19,13 @@ const STEP_LABELS = {
   services: 'Select Services',
   'additional-services': 'Additional Services',
   schedule: 'Select Date & Time',
+  slot: 'Select Slot',
   confirmation: 'Confirmation',
   payment: 'Payment',
 };
+
+// labels that differ for one kind of booking
+const ROOM_STEP_LABELS = { ...STEP_LABELS, services: 'Room Type' };
 
 const TYPE_TITLES = {
   grooming: 'Grooming Appointment',
@@ -39,6 +45,7 @@ function BookingStep({ step, title, subtitle, planned, children, canNext = true,
   const index = flow.indexOf(step);
   if (index === -1) return <Navigate to={`/book/${type}/${flow[0]}`} replace />;
 
+  const labels = type === 'room' ? ROOM_STEP_LABELS : STEP_LABELS;
   const isLast = index === flow.length - 1;
   const backTo = index > 0 ? `/book/${type}/${flow[index - 1]}` : '/services';
   const nextTo = isLast ? '/receipts/sample' : `/book/${type}/${flow[index + 1]}`;
@@ -53,7 +60,7 @@ function BookingStep({ step, title, subtitle, planned, children, canNext = true,
   return (
     <PageShell title={title} subtitle={subtitle || TYPE_TITLES[type]}>
       <div className="page-steps">
-        <Steps current={index} size="small" items={flow.map((s) => ({ title: STEP_LABELS[s] }))} />
+        <Steps current={index} size="small" items={flow.map((s) => ({ title: labels[s] }))} />
       </div>
 
       {children}

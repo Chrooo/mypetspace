@@ -2,11 +2,14 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
 const petController = require('../controllers/petController');
+const appointmentController = require('../controllers/appointmentController');
+const roomController = require('../controllers/roomController');
 const twoFactor = require('../controllers/twoFactorController');
 const adminController = require('../controllers/adminController');
 const groomerController = require('../controllers/groomerController');
 const staffAppointmentsController = require('../controllers/staffAppointmentsController');
 const { protect, authorize } = require('../middleware/authMiddleware');
+
 
 router.post('/register', authController.register);
 router.post('/login', authController.login);
@@ -23,6 +26,10 @@ router.put('/pets/:id', protect, petController.updatePet);
 router.get('/appointments/availability', protect, authorize('customer', 'staff', 'admin'), appointmentController.getAvailability);
 router.get('/appointments/assignment', protect, authorize('customer', 'staff', 'admin'), appointmentController.getAssignment);
 router.post('/appointments', protect, authorize('customer', 'staff', 'admin'), appointmentController.createAppointment);
+// hotel rooms: which slots are free, and saving a room booking
+router.get('/rooms/availability', protect, authorize('customer', 'staff', 'admin'), roomController.getAvailability);
+router.get('/rooms/slots', protect, authorize('customer', 'staff', 'admin'), roomController.getSlots);
+router.post('/rooms/reservations', protect, authorize('customer', 'staff', 'admin'), roomController.createReservation);
 
 // two-factor authentication
 router.post('/login/2fa', twoFactor.loginSecondStep);
