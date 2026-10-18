@@ -117,7 +117,9 @@ const updateAppointment = async (req, res) => {
   }
 };
 
-// PUT /api/staff/bookings/:id/payment   body: { method, total? }   (grooming bookings)
+// PUT /api/staff/bookings/:id/payment   body: { method, total?, confirm? }   (grooming bookings)
+//   total   -> the amount; the booking already has one worked out from the pet's weight, staff can correct it
+//   confirm -> also move a Pending booking to Confirmed (the Confirm button asks for the payment first)
 const recordPayment = async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id)) return res.status(404).json({ message: 'Booking not found.' });
@@ -126,7 +128,7 @@ const recordPayment = async (req, res) => {
     if (appointment.paymentStatus === 'paid') return res.status(400).json({ message: 'This booking is already paid.' });
     if (appointment.status === 'cancelled') return res.status(400).json({ message: 'A cancelled booking cannot be paid.' });
 
-    const { method, total } = req.body || {};
+    const { method, total, confirm } = req.body || {};
     if (!METHODS.includes(method)) return res.status(400).json({ message: 'Please choose how it was paid.' });
     if (total !== undefined) {
       const amount = Number(total);
@@ -138,12 +140,17 @@ const recordPayment = async (req, res) => {
     appointment.paymentStatus = 'paid';
     appointment.paymentMethod = method;
     appointment.paidAt = new Date();
+    const confirmed = confirm === true && appointment.status === 'pending';
+    if (confirmed) appointment.status = 'confirmed';
     await appointment.save();
 
     await logAction('Payment Recorded', req.user, {
       affected: `${appointment.petName} (${appointment.customerName}): ₱${appointment.total} via ${method}`,
     });
-    res.json({ booking: { _id: appointment._id, total: appointment.total, paymentStatus: 'paid', paymentMethod: method } });
+    if (confirmed) {
+      await logAction('Appointment Status Updated', req.user, { affected: `${appointment.petName} (${appointment.customerName}): Pending → Confirmed` });
+    }
+    res.json({ booking: { _id: appointment._id, total: appointment.total, status: appointment.status, paymentStatus: 'paid', paymentMethod: method } });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Internal Server Error' });

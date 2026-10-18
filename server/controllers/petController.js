@@ -31,11 +31,15 @@ const cleanPet = (input) => {
   if (pet.age === undefined || pet.age === null || String(pet.age).trim() === '' || !Number.isFinite(age) || age < 0 || age > 40) {
     return { error: 'Pet age must be a number from 0 to 40 (in years).' };
   }
+  const weight = Number(pet.weight);
+  if (pet.weight === undefined || pet.weight === null || String(pet.weight).trim() === '' || !Number.isFinite(weight) || weight < 0.1 || weight > 100) {
+    return { error: 'Pet weight must be a number from 0.1 to 100 (in kg).' };
+  }
   if (!GENDERS.includes(pet.gender)) return { error: 'Choose your pet\'s gender.' };
   if (!TYPES.includes(pet.type)) return { error: 'Choose your pet\'s type (Dog or Cat).' };
   if (notes.length > 300) return { error: 'Additional notes can be 300 characters at most.' };
 
-  const clean = { name, breed, age, gender: pet.gender, type: pet.type, notes };
+  const clean = { name, breed, age, weight: Math.round(weight * 10) / 10, gender: pet.gender, type: pet.type, notes };
 
   if (pet.photo !== undefined && pet.photo !== null) {
     const photo = String(pet.photo);

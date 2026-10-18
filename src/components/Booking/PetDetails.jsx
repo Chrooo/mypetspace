@@ -131,6 +131,7 @@ function PetDetails() {
                 <dt>Gender</dt><dd>{pet.gender}</dd>
                 <dt>Breed</dt><dd>{pet.breed}</dd>
                 <dt>Age</dt><dd>{ageText(pet.age)}</dd>
+                <dt>Weight</dt><dd>{pet.weight ? `${pet.weight} kg` : 'Not set - add it in My Pets'}</dd>
                 <dt>Notes</dt><dd>{pet.notes || 'None'}</dd>
               </dl>
             </>

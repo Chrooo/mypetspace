@@ -3,6 +3,7 @@ import axios from 'axios';
 import dayjs from 'dayjs';
 import { Alert, Button, DatePicker, Input, InputNumber, Modal, Radio, Segmented, Select, Spin, message } from 'antd';
 import { API_URL } from '../../auth';
+import { groomingTotal, sizeOf, SIZE_LABELS } from '../../data/groomingPrices';
 import { CHOICE_HOURS, MIN_DAY_HOURS, ROOM_OPTIONS, findRoom, hourLabel, stayTotal, timeValue } from '../../data/roomOptions';
 
 // "New booking" window for staff and admin: book a grooming appointment or a hotel room for a customer
@@ -28,7 +29,7 @@ const PAY_OPTIONS = [
   { value: '', label: 'Pay later' },
 ];
 const peso = (n) => `₱${Number(n || 0).toLocaleString('en-PH')}`;
-const EMPTY_PET = { name: '', type: 'Dog', breed: '', age: null, gender: 'Male', notes: '' };
+const EMPTY_PET = { name: '', type: 'Dog', breed: '', age: null, weight: null, gender: 'Male', notes: '' };
 const row = { display: 'grid', gap: 4, marginBottom: 12 };
 
 function NewBookingModal({ open, initialType, onClose, onCreated }) {
@@ -107,6 +108,11 @@ function NewBookingModal({ open, initialType, onClose, onCreated }) {
     };
   }, [type, date]);
 
+  // the price comes from the services and the pet's weight; staff only type it when it cannot be worked out
+  const pet = customer?.pets.find((p) => p._id === petId) || null;
+  const computed = groomingTotal(services, pet?.weight);
+  const groomingDue = computed > 0 ? computed : Number(amount) || 0;
+
   // ----- hotel -----
   const room = findRoom(roomId);
   const isDay = room?.kind === 'day';
@@ -169,7 +175,7 @@ function NewBookingModal({ open, initialType, onClose, onCreated }) {
     if (type === 'grooming') {
       if (services.length === 0) return 'Choose at least one service or a package.';
       if (!date || !time) return 'Choose a date and a time.';
-      if (method && !(amount > 0)) return 'Enter the amount paid.';
+      if (method && !(groomingDue > 0)) return 'Enter the amount paid - this pet has no weight yet.';
     } else {
       if (!room) return 'Choose a room.';
       if (!start || (!isDay && !end)) return 'Choose the check-in and check-out dates.';
@@ -179,7 +185,7 @@ function NewBookingModal({ open, initialType, onClose, onCreated }) {
       if (!slot) return 'Choose a slot.';
     }
     return '';
-  }, [type, customer, petId, services, date, time, method, amount, room, start, end, isDay, inHour, outHour, hours, price, slot]);
+  }, [type, customer, petId, services, date, time, groomingDue, room, start, end, isDay, inHour, outHour, hours, price, slot]);
 
   const submit = async () => {
     setSaving(true);
@@ -188,7 +194,7 @@ function NewBookingModal({ open, initialType, onClose, onCreated }) {
       if (type === 'grooming') {
         await axios.post(`${API_URL}/staff/appointments`, {
           customerId: customer._id, petId, services, date, time, groomerId: groomerId || undefined,
-          total: amount || undefined, paymentMethod: method || undefined,
+          total: computed > 0 ? undefined : amount || undefined, paymentMethod: method || undefined,
         });
       } else {
         await axios.post(`${API_URL}/staff/reservations`, {
@@ -261,6 +267,7 @@ function NewBookingModal({ open, initialType, onClose, onCreated }) {
             <Select value={newCustomer.pet.type} onChange={setPet('type')} options={['Dog', 'Cat'].map((v) => ({ value: v, label: v }))} />
             <Input placeholder="Breed" value={newCustomer.pet.breed} onChange={setPet('breed')} />
             <InputNumber min={0} max={40} placeholder="Age (years)" value={newCustomer.pet.age} onChange={setPet('age')} style={{ width: '100%' }} />
+            <InputNumber min={0.1} max={100} placeholder="Weight (kg)" value={newCustomer.pet.weight} onChange={setPet('weight')} style={{ width: '100%' }} />
             <Select value={newCustomer.pet.gender} onChange={setPet('gender')} options={['Male', 'Female'].map((v) => ({ value: v, label: v }))} />
             <Input placeholder="Notes (optional)" value={newCustomer.pet.notes} onChange={setPet('notes')} />
           </div>
@@ -298,8 +305,21 @@ function NewBookingModal({ open, initialType, onClose, onCreated }) {
           </div>
           <h4>4. Payment</h4>
           <div style={row}>
-            <label>Amount (₱) - grooming prices depend on the pet&apos;s size</label>
-            <InputNumber min={0} value={amount} onChange={setAmount} style={{ width: '100%' }} />
+            {computed > 0 ? (
+              <>
+                <b>Amount: {peso(computed)}</b>
+                <small>
+                  {pet?.weight
+                    ? `Worked out from the services and the pet's weight (${pet.weight} kg, ${SIZE_LABELS[sizeOf(pet.weight)].toLowerCase()}).`
+                    : 'Fixed prices for these services.'}
+                </small>
+              </>
+            ) : (
+              <>
+                <label>Amount (₱){services.length > 0 ? ' - this pet has no weight yet, so the price cannot be worked out' : ''}</label>
+                <InputNumber min={0} value={amount} onChange={setAmount} style={{ width: '100%' }} />
+              </>
+            )}
           </div>
         </>
       ) : (

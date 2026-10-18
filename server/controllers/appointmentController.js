@@ -4,6 +4,7 @@ const PetModel = require('../models/Pet');
 const UserModel = require('../models/User');
 const { logAction } = require('../utils/audit');
 const { SLOTS, MAX_PER_SLOT, HOUR, slotMoment, isValidDate } = require('../utils/slots');
+const { groomingTotal } = require('../utils/pricing');
 
 // the names the booking page can send (same names the groomer pages use)
 const SERVICES = ['Bath-Dry', 'Tear Strain', 'Eye Cleaning', 'Nail Trimming', 'Ear Cleaning', 'Dematting'];
@@ -129,11 +130,13 @@ const createAppointment = async (req, res) => {
       petType: pet.type,
       petBreed: pet.breed,
       petAge: pet.age,
+      petWeight: pet.weight,
       petGender: pet.gender,
       petNotes: pet.notes,
       services: list,
       groomer: groomer._id,
       scheduledAt: slot.at,
+      total: groomingTotal(list, pet.weight), // from the service prices and the pet's weight
     });
 
     await logAction('Appointment Booked', req.user, { affected: pet.name });

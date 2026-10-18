@@ -1,6 +1,7 @@
 const UserModel = require('../models/User');
 const AuditLog = require('../models/AuditLog');
 const Payment = require('../models/Payment');
+const Appointment = require('../models/Appointment');
 
 // shared by the admin lists: ?page=1&pageSize=10
 const paging = (query) => {
@@ -54,23 +55,44 @@ const listAuditLogs = async (req, res) => {
   }
 };
 
-// GET /api/admin/payments?search=&sort=&from=&to=&page=&pageSize=  (admin only)
+// Hotel payments are saved as Payment records. Grooming payments are saved on the appointment itself
+// (paymentStatus "paid", amount = total), so the admin list puts both together, one row per payment.
+const groomingRef = (id) => `G-${String(id).slice(-8).toUpperCase()}`;
+
+// GET /api/admin/payments?type=&search=&sort=&from=&to=&page=&pageSize=  (admin only)
+//   type = "hotel" | "grooming" (leave out for all payments)
 const listPayments = async (req, res) => {
   try {
     const { page, pageSize, skip } = paging(req.query);
-    const filter = {};
+    const range = dateRange(req.query);
+    const type = ['hotel', 'grooming'].includes(req.query.type) ? req.query.type : '';
+
+    const [hotel, grooming] = await Promise.all([
+      type === 'grooming' ? [] : Payment.find(range ? { createdAt: range } : {}).lean(),
+      type === 'hotel' ? [] : Appointment.find({ paymentStatus: 'paid', ...(range ? { paidAt: range } : {}) }).lean(),
+    ]);
+
+    let rows = [
+      ...hotel.map((p) => ({
+        _id: p._id, type: 'Hotel', customerName: p.customerName, amount: p.amount,
+        createdAt: p.createdAt, method: p.method, transactionNo: p.transactionNo,
+      })),
+      ...grooming.map((a) => ({
+        _id: a._id, type: 'Grooming', customerName: a.customerName, amount: a.total,
+        createdAt: a.paidAt || a.updatedAt, method: a.paymentMethod, transactionNo: groomingRef(a._id),
+      })),
+    ];
+
     if (req.query.search && req.query.search.trim()) {
       const text = textPattern(req.query.search);
-      filter.$or = [{ customerName: text }, { transactionNo: text }, { method: text }];
+      rows = rows.filter((r) => text.test(r.customerName || '') || text.test(r.transactionNo || '') || text.test(r.method || ''));
     }
-    const range = dateRange(req.query);
-    if (range) filter.createdAt = range;
 
-    const [payments, total] = await Promise.all([
-      Payment.find(filter).sort(sortBy(req.query.sort, 'customerName')).skip(skip).limit(pageSize),
-      Payment.countDocuments(filter),
-    ]);
-    res.json({ payments, total, page, pageSize });
+    if (req.query.sort === 'oldest') rows.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    else if (req.query.sort === 'alphabetical') rows.sort((a, b) => String(a.customerName).localeCompare(String(b.customerName)) || new Date(b.createdAt) - new Date(a.createdAt));
+    else rows.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    res.json({ payments: rows.slice(skip, skip + pageSize), total: rows.length, page, pageSize });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Internal Server Error' });
@@ -85,7 +107,7 @@ const getSummary = async (req, res) => {
     const lastWeek = new Date(now - 7 * 24 * 60 * 60 * 1000);
     const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 
-    const [totalUsers, newSignups, failedLogins, paid, recent] = await Promise.all([
+    const [totalUsers, newSignups, failedLogins, paid, groomingPaid, recent] = await Promise.all([
       UserModel.countDocuments(),
       UserModel.countDocuments({ role: 'customer', createdAt: { $gte: lastWeek } }),
       AuditLog.countDocuments({ action: /login/i, status: 'failed', createdAt: { $gte: lastDay } }),
@@ -93,10 +115,15 @@ const getSummary = async (req, res) => {
         { $match: { createdAt: { $gte: monthStart } } },
         { $group: { _id: null, total: { $sum: '$amount' } } },
       ]),
+      Appointment.aggregate([
+        { $match: { paymentStatus: 'paid', paidAt: { $gte: monthStart } } },
+        { $group: { _id: null, total: { $sum: '$total' } } },
+      ]),
       AuditLog.find().sort({ createdAt: -1 }).limit(4),
     ]);
 
-    res.json({ totalUsers, newSignups, failedLogins, paymentsThisMonth: paid[0]?.total || 0, recent });
+    // paymentsThisMonth = hotel payments + grooming payments
+    res.json({ totalUsers, newSignups, failedLogins, paymentsThisMonth: (paid[0]?.total || 0) + (groomingPaid[0]?.total || 0), recent });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Internal Server Error' });

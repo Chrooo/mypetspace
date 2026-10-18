@@ -22,6 +22,7 @@ const AppointmentSchema = new mongoose.Schema(
     petType: { type: String, enum: ['Dog', 'Cat'], required: true },
     petBreed: { type: String, default: '' },
     petAge: { type: Number },
+    petWeight: { type: Number }, // kg, copied from the pet: the price of a package depends on it
     petGender: { type: String, default: '' },
     petNotes: { type: String, default: '' }, // from the owner: allergies, special care
     services: { type: [String], required: true }, // e.g. ["Full Groom"] or ["Bath-Dry", "Nail Trimming"]
