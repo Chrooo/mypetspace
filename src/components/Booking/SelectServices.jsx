@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Navigate, useParams } from 'react-router-dom';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Alert, DatePicker, Select } from 'antd';
 import { LeftOutlined, RightOutlined, SlidersOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import BookingStep from './BookingStep';
+import SlotModal from './SlotModal';
 import { API_URL } from '../../auth';
 import { MIN_DAY_HOURS, ROOM_CATEGORIES, ROOM_OPTIONS, stayTotal } from '../../data/roomOptions';
 import './Booking.css';
@@ -123,11 +124,16 @@ function GroomingServices({ type }) {
 
 /* ---------- Room Type (room booking, step 2) ---------- */
 // What this step remembers for the next steps:
-//   booking:room:room   -> the chosen room's id (see data/roomOptions.js)
-//   booking:room:dates  -> JSON { start: "YYYY-MM-DD", end: "YYYY-MM-DD" }
-// Choosing a different room or dates clears the slot and time of the next step.
+//   booking:room:room    -> the chosen room's id (see data/roomOptions.js)
+//   booking:room:dates   -> JSON { start: "YYYY-MM-DD", end: "YYYY-MM-DD" }
+//   booking:room:time    -> check-in time "10:00"   (saved when the Slots pop-up is confirmed)
+//   booking:room:outTime -> check-out time "16:00"
+//   booking:room:hours   -> Day Boarding only: hours of the stay
+//   booking:room:slot    -> the chosen slot number
+// Choosing different dates clears the room, times and slot.
 const roomKey = (type) => `booking:${type}:room`;
 const datesKey = (type) => `booking:${type}:dates`;
+const slotKey = (type) => `booking:${type}:slot`;
 const removeSaved = (key) => {
   try {
     sessionStorage.removeItem(key);
@@ -135,7 +141,7 @@ const removeSaved = (key) => {
     /* storage unavailable */
   }
 };
-const clearSlotChoice = (type) => ['slot', 'time', 'hours'].forEach((n) => removeSaved(`booking:${type}:${n}`));
+const clearSlotChoice = (type) => ['slot', 'time', 'outTime', 'hours'].forEach((n) => removeSaved(`booking:${type}:${n}`));
 
 const readDates = (type) => {
   try {
@@ -153,11 +159,15 @@ const PRICE_SORTS = [
 ];
 
 function RoomType({ type }) {
+  const navigate = useNavigate();
   const [room, setRoom] = useState(() => {
     const id = readSaved(roomKey(type));
     return ROOM_OPTIONS.some((r) => r.id === id) ? id : null;
   });
   const [dates, setDates] = useState(() => readDates(type)); // { start, end } or null
+  const [slot, setSlot] = useState(() => Number(readSaved(slotKey(type))) || null); // confirmed slot of `room`
+  const [openId, setOpenId] = useState(null); // the room whose Slots pop-up is open
+  const [notice, setNotice] = useState('');
   const [categories, setCategories] = useState([]); // empty = show every category
   const [sort, setSort] = useState(null); // 'low' | 'high' | null (original order)
   const [avail, setAvail] = useState(null); // { [roomId]: { free, maxPets, reason? } } for the chosen dates
@@ -200,6 +210,7 @@ function RoomType({ type }) {
     if (!room || !avail || !avail[room]) return;
     if (avail[room].free <= 0) {
       setRoom(null);
+      setSlot(null);
       removeSaved(roomKey(type));
       clearSlotChoice(type);
     }
@@ -239,16 +250,40 @@ function RoomType({ type }) {
     el.scrollBy({ left: dir * step, behavior: 'smooth' });
   };
 
+  // clicking a room opens the Slots pop-up (it needs the dates first)
   const onPick = (id) => {
-    const next = room === id ? null : id; // click again to un-select
-    setRoom(next);
-    clearSlotChoice(type); // a new room means a new slot
-    if (next) writeSaved(roomKey(type), next);
-    else removeSaved(roomKey(type));
+    if (!dates) {
+      setNotice('Please choose your check-in and check-out dates first.');
+      return;
+    }
+    if (!avail) {
+      setNotice('Still checking the available rooms. Please try again in a moment.');
+      return;
+    }
+    setNotice('');
+    setOpenId(id);
+  };
+
+  // Confirm in the pop-up: remember the choices and go to the Confirmation step
+  const onSlotConfirm = (sel) => {
+    writeSaved(roomKey(type), openId);
+    writeSaved(`booking:${type}:time`, sel.time);
+    writeSaved(`booking:${type}:outTime`, sel.outTime);
+    if (sel.hours) writeSaved(`booking:${type}:hours`, String(sel.hours));
+    else removeSaved(`booking:${type}:hours`);
+    writeSaved(slotKey(type), String(sel.slot));
+    setRoom(openId);
+    setSlot(sel.slot);
+    setOpenId(null);
+    navigate(`/book/${type}/confirmation`);
   };
 
   const onDates = (range) => {
-    clearSlotChoice(type); // new dates mean the slot must be picked again
+    clearSlotChoice(type); // new dates mean the room and slot must be picked again
+    setRoom(null);
+    setSlot(null);
+    removeSaved(roomKey(type));
+    setNotice('');
     if (range && range[0] && range[1]) {
       const next = { start: range[0].format('YYYY-MM-DD'), end: range[1].format('YYYY-MM-DD') };
       setDates(next);
@@ -268,7 +303,7 @@ function RoomType({ type }) {
       : `${dayjs(dates.start).format('MMM D')} - ${dayjs(dates.end).format('MMM D, YYYY')}`
     : '';
   const checked = !!avail; // availability for the chosen dates is known
-  const canNext = !!chosen && !!dates && checked && !chosenState.blocked;
+  const canNext = !!chosen && !!slot && !!dates && checked && !chosenState.blocked;
   const total = chosen && dates ? stayTotal(chosen, nights, MIN_DAY_HOURS) : null;
 
   return (
@@ -279,6 +314,7 @@ function RoomType({ type }) {
       canNext={canNext}
     >
       {availError && <Alert type="error" showIcon title={availError} className="bk-alert" />}
+      {notice && <Alert type="warning" showIcon title={notice} className="bk-alert" closable onClose={() => setNotice('')} />}
 
       <section className="rt-panel">
         <div className="rt-tools">
@@ -329,7 +365,7 @@ function RoomType({ type }) {
           <div className="rt-track" ref={trackRef} onScroll={updateEdge} role="listbox" aria-label="Room types">
             {rooms.length === 0 && <p className="rt-empty">No rooms match this filter.</p>}
             {rooms.map((r) => {
-              const on = r.id === room;
+              const on = r.id === room && !!slot;
               const st = stateOf(r);
               return (
                 <button
@@ -374,20 +410,28 @@ function RoomType({ type }) {
         </div>
 
         <p className="rt-foot" aria-live="polite">
-          {!dates && 'Choose your check-in and check-out dates to see which rooms are available.'}
+          {!dates && 'Choose your check-in and check-out dates, then click a room to pick your times and slot.'}
           {dates && !checked && !availError && 'Checking available rooms...'}
-          {dates && checked && !chosen && 'Now choose a room.'}
-          {dates && checked && chosen && chosenState.blocked && 'That room is not available for these dates. Please choose another.'}
-          {dates && checked && chosen && !chosenState.blocked && (
+          {dates && checked && !(chosen && slot) && 'Click a room to choose your times and slot.'}
+          {dates && checked && chosen && slot && !chosenState.blocked && (
             <>
-              <b>{chosen.name}</b>, {stayText}
+              <b>{chosen.name}</b>, slot <b>{slot}</b>, {stayText}
               {chosen.kind === 'night' && <> ({nights} {nights === 1 ? 'night' : 'nights'})</>}
               {total !== null && <> - {chosen.kind === 'day' ? 'from ' : ''}<b>₱{total.toLocaleString()}</b></>}
-              . Next, choose your slot.
             </>
           )}
         </p>
       </section>
+
+      {openId && dates && (
+        <SlotModal
+          room={ROOM_OPTIONS.find((r) => r.id === openId)}
+          dates={dates}
+          initial={openId === room ? { time: readSaved(`booking:${type}:time`), outTime: readSaved(`booking:${type}:outTime`), slot } : null}
+          onClose={() => setOpenId(null)}
+          onConfirm={onSlotConfirm}
+        />
+      )}
     </BookingStep>
   );
 }

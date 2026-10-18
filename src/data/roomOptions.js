@@ -130,16 +130,13 @@ export const OPEN_HOUR = 7;          // earliest check-in / day boarding start
 export const LAST_CHECKIN_HOUR = 19; // latest overnight check-in
 export const CLOSE_HOUR = 20;        // day boarding must end by 8:00 pm
 export const MIN_DAY_HOURS = 3;
-export const MAX_DAY_HOURS = 10;
+export const MAX_DAY_HOURS = 12;
+
+// the check-in and check-out times offered in the Slots pop-up
+export const CHOICE_HOURS = [7, 10, 13, 16, 19];
 
 export const hourLabel = (h) => `${h % 12 === 0 ? 12 : h % 12}:00 ${h < 12 ? 'AM' : 'PM'}`;
 export const timeValue = (h) => `${String(h).padStart(2, '0')}:00`;
-
-// the choices on the Select Slot step
-export const checkInHours = (room) => {
-  const last = room.kind === 'day' ? CLOSE_HOUR - MIN_DAY_HOURS : LAST_CHECKIN_HOUR;
-  return Array.from({ length: last - OPEN_HOUR + 1 }, (_, i) => OPEN_HOUR + i);
-};
 
 export const findRoom = (id) => ROOM_OPTIONS.find((r) => r.id === id) || null;
 

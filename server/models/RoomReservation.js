@@ -19,6 +19,7 @@ const RoomReservationSchema = new mongoose.Schema(
     startDate: { type: String, required: true }, // "YYYY-MM-DD" check-in day
     endDate: { type: String, required: true }, // "YYYY-MM-DD" check-out day
     checkInAt: { type: Date, required: true }, // check-in day + the time the customer chose
+        checkOutAt: { type: Date }, // check-out day + the time the customer chose
     hours: { type: Number }, // Day Boarding only
     nights: { type: Number, default: 0 },
 

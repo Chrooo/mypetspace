@@ -11,7 +11,7 @@ import Planned from '../Layout/Planned';
 // "additional-services" and "schedule" are not part of it.
 const FLOWS = {
   grooming: ['pet-details', 'services', 'schedule', 'confirmation'],
-  room: ['pet-details', 'services', 'slot', 'confirmation', 'payment'],
+    room: ['pet-details', 'services', 'confirmation', 'payment'],
 };
 
 const STEP_LABELS = {
@@ -19,7 +19,6 @@ const STEP_LABELS = {
   services: 'Select Services',
   'additional-services': 'Additional Services',
   schedule: 'Select Date & Time',
-  slot: 'Select Slot',
   confirmation: 'Confirmation',
   payment: 'Payment',
 };
