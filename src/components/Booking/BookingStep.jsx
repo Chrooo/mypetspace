@@ -35,8 +35,9 @@ const TYPE_TITLES = {
 // subtitle: optional, replaces the default subtitle under the title
 // children: real page content (shown above the "planned" box)
 // canNext: set to false to disable Next until the step is complete (default true)
+// hideActions: hides Back / Next (a page that has its own buttons, like the Slots section)
 // customNext: optional button that replaces the Next button (the Confirmation page uses it)
-function BookingStep({ step, title, subtitle, planned, children, canNext = true, customNext }) {
+function BookingStep({ step, title, subtitle, planned, children, canNext = true, customNext, hideActions = false }) {
   const { type } = useParams();
   const flow = FLOWS[type];
 
@@ -66,8 +67,9 @@ function BookingStep({ step, title, subtitle, planned, children, canNext = true,
 
       <Planned items={planned} />
 
+      {!hideActions && (
       <div className="page-actions">
-        <Link to={backTo} className="btn btn-outline-teal">Back</Link>
+        <Link to={backTo} state={step === 'confirmation' ? { fromConfirmation: true } : undefined} className="btn btn-outline-teal">Back</Link>
         {customNext ||
           (canNext ? (
             <Link to={nextTo} className="btn btn-pink">{nextContent}</Link>
@@ -75,6 +77,7 @@ function BookingStep({ step, title, subtitle, planned, children, canNext = true,
             <button type="button" className="btn btn-pink" disabled>{nextContent}</button>
           ))}
       </div>
+      )}
     </PageShell>
   );
 }

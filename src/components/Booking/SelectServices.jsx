@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Navigate, useNavigate, useParams } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Alert, DatePicker, Select } from 'antd';
-import { LeftOutlined, RightOutlined, SlidersOutlined } from '@ant-design/icons';
+import { ArrowRightOutlined, LeftOutlined, RightOutlined, SlidersOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import BookingStep from './BookingStep';
-import SlotModal from './SlotModal';
+import SlotPanel from './SlotPanel';
 import { API_URL } from '../../auth';
 import { MIN_DAY_HOURS, ROOM_CATEGORIES, ROOM_OPTIONS, stayTotal } from '../../data/roomOptions';
 import './Booking.css';
@@ -126,7 +126,7 @@ function GroomingServices({ type }) {
 // What this step remembers for the next steps:
 //   booking:room:room    -> the chosen room's id (see data/roomOptions.js)
 //   booking:room:dates   -> JSON { start: "YYYY-MM-DD", end: "YYYY-MM-DD" }
-//   booking:room:time    -> check-in time "10:00"   (saved when the Slots pop-up is confirmed)
+//   booking:room:time    -> check-in time "10:00"   (saved when the Slots section is confirmed)
 //   booking:room:outTime -> check-out time "16:00"
 //   booking:room:hours   -> Day Boarding only: hours of the stay
 //   booking:room:slot    -> the chosen slot number
@@ -166,7 +166,15 @@ function RoomType({ type }) {
   });
   const [dates, setDates] = useState(() => readDates(type)); // { start, end } or null
   const [slot, setSlot] = useState(() => Number(readSaved(slotKey(type))) || null); // confirmed slot of `room`
-  const [openId, setOpenId] = useState(null); // the room whose Slots pop-up is open
+  // the room whose Slots section is showing (replaces the room list). Coming from Select Pet always starts on the
+  // room list; pressing Back on the Confirmation step reopens the Slots section of the room that was confirmed.
+  const location = useLocation();
+  const [openId, setOpenId] = useState(() => {
+    if (!location.state?.fromConfirmation) return null;
+    const id = readSaved(roomKey(type));
+    const savedSlot = Number(readSaved(slotKey(type))) || null;
+    return ROOM_OPTIONS.some((r) => r.id === id) && savedSlot && readDates(type) ? id : null;
+  });
   const [notice, setNotice] = useState('');
   const [categories, setCategories] = useState([]); // empty = show every category
   const [sort, setSort] = useState(null); // 'low' | 'high' | null (original order)
@@ -211,6 +219,7 @@ function RoomType({ type }) {
     if (avail[room].free <= 0) {
       setRoom(null);
       setSlot(null);
+      setOpenId(null);
       removeSaved(roomKey(type));
       clearSlotChoice(type);
     }
@@ -250,7 +259,7 @@ function RoomType({ type }) {
     el.scrollBy({ left: dir * step, behavior: 'smooth' });
   };
 
-  // clicking a room opens the Slots pop-up (it needs the dates first)
+  // clicking a room only selects it (it needs the dates first). The Slots section opens with Next.
   const onPick = (id) => {
     if (!dates) {
       setNotice('Please choose your check-in and check-out dates first.');
@@ -261,10 +270,22 @@ function RoomType({ type }) {
       return;
     }
     setNotice('');
-    setOpenId(id);
+    if (id !== room) {
+      // a different room: the times and slot picked for the old room no longer apply
+      clearSlotChoice(type);
+      setSlot(null);
+      setRoom(id);
+      writeSaved(roomKey(type), id);
+    }
   };
 
-  // Confirm in the pop-up: remember the choices and go to the Confirmation step
+  // Next: show the Slots section (second part of the Room Type step) for the selected room
+  const onNext = () => {
+    setOpenId(room);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Confirm in the Slots section: remember the choices and go to the Confirmation step
   const onSlotConfirm = (sel) => {
     writeSaved(roomKey(type), openId);
     writeSaved(`booking:${type}:time`, sel.time);
@@ -303,19 +324,36 @@ function RoomType({ type }) {
       : `${dayjs(dates.start).format('MMM D')} - ${dayjs(dates.end).format('MMM D, YYYY')}`
     : '';
   const checked = !!avail; // availability for the chosen dates is known
-  const canNext = !!chosen && !!slot && !!dates && checked && !chosenState.blocked;
+  const canNext = !!chosen && !!dates && checked && !chosenState.blocked;
   const total = chosen && dates ? stayTotal(chosen, nights, MIN_DAY_HOURS) : null;
+  const showSlots = !!openId && !!dates; // the Slots section takes the place of the room list
 
   return (
     <BookingStep
       step="services"
       title="Book a Room"
       subtitle="Choose the perfect room for your fur babies."
-      canNext={canNext}
+      hideActions={showSlots}
+      customNext={
+        <button type="button" className="btn btn-pink" disabled={!canNext} onClick={onNext}>
+          Next
+          <ArrowRightOutlined style={{ marginLeft: 8 }} />
+        </button>
+      }
     >
       {availError && <Alert type="error" showIcon title={availError} className="bk-alert" />}
       {notice && <Alert type="warning" showIcon title={notice} className="bk-alert" closable onClose={() => setNotice('')} />}
 
+      {showSlots ? (
+        <SlotPanel
+          key={openId}
+          room={ROOM_OPTIONS.find((r) => r.id === openId)}
+          dates={dates}
+          initial={openId === room ? { time: readSaved(`booking:${type}:time`), outTime: readSaved(`booking:${type}:outTime`), slot } : null}
+          onBack={() => setOpenId(null)}
+          onConfirm={onSlotConfirm}
+        />
+      ) : (
       <section className="rt-panel">
         <div className="rt-tools">
           <Select
@@ -365,7 +403,7 @@ function RoomType({ type }) {
           <div className="rt-track" ref={trackRef} onScroll={updateEdge} role="listbox" aria-label="Room types">
             {rooms.length === 0 && <p className="rt-empty">No rooms match this filter.</p>}
             {rooms.map((r) => {
-              const on = r.id === room && !!slot;
+              const on = r.id === room;
               const st = stateOf(r);
               return (
                 <button
@@ -410,27 +448,19 @@ function RoomType({ type }) {
         </div>
 
         <p className="rt-foot" aria-live="polite">
-          {!dates && 'Choose your check-in and check-out dates, then click a room to pick your times and slot.'}
+          {!dates && 'Choose your check-in and check-out dates, then click a room.'}
           {dates && !checked && !availError && 'Checking available rooms...'}
-          {dates && checked && !(chosen && slot) && 'Click a room to choose your times and slot.'}
-          {dates && checked && chosen && slot && !chosenState.blocked && (
+          {dates && checked && !chosen && 'Click a room, then press Next to choose your times and slot.'}
+          {dates && checked && chosen && !chosenState.blocked && (
             <>
-              <b>{chosen.name}</b>, slot <b>{slot}</b>, {stayText}
+              <b>{chosen.name}</b>, {stayText}
               {chosen.kind === 'night' && <> ({nights} {nights === 1 ? 'night' : 'nights'})</>}
               {total !== null && <> - {chosen.kind === 'day' ? 'from ' : ''}<b>₱{total.toLocaleString()}</b></>}
+              . Press Next to choose your times and slot.
             </>
           )}
         </p>
       </section>
-
-      {openId && dates && (
-        <SlotModal
-          room={ROOM_OPTIONS.find((r) => r.id === openId)}
-          dates={dates}
-          initial={openId === room ? { time: readSaved(`booking:${type}:time`), outTime: readSaved(`booking:${type}:outTime`), slot } : null}
-          onClose={() => setOpenId(null)}
-          onConfirm={onSlotConfirm}
-        />
       )}
     </BookingStep>
   );
