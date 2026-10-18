@@ -3,6 +3,15 @@ const mongoose = require('mongoose');
 // One hotel booking: one pet, in one slot of one room type, for a stay.
 const STATUSES = ['pending', 'confirmed', 'checked_in', 'completed', 'cancelled'];
 
+// which status can follow which (completed and cancelled are final)
+const NEXT = {
+  pending: ['confirmed', 'cancelled'],
+  confirmed: ['checked_in', 'cancelled'],
+  checked_in: ['completed'],
+  completed: [],
+  cancelled: [],
+};
+
 const RoomReservationSchema = new mongoose.Schema(
   {
     customer: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
@@ -45,3 +54,4 @@ RoomReservationSchema.index({ pet: 1, active: 1 });
 
 module.exports = mongoose.model('RoomReservation', RoomReservationSchema);
 module.exports.STATUSES = STATUSES;
+module.exports.NEXT = NEXT;

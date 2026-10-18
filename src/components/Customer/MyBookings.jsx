@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import { Alert, Modal, Spin } from 'antd';
+import { Alert, Modal, Spin, message } from 'antd';
 import { ArrowLeftOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons';
-import { API_URL, getUser } from '../../auth';
+import { API_URL, useUser } from '../../auth';
 import logo from '../../assets/logo.png';
+import { HeaderAvatar } from './Avatar';
 import './CustomerDashboard.css'; // top bar styles are shared with the dashboard
 import './MyBookings.css';
 
@@ -85,6 +86,9 @@ const detailRows = (b) => {
       ['Payment', paid ? `Paid ${how}`.trim() : 'Unpaid']
     );
   }
+  if (b.kind === 'room' && b.total > 0) {
+    rows.push(['Paid so far', peso(b.paid || 0)], ['Remaining', peso(Math.max(b.total - (b.paid || 0), 0))]);
+  }
   rows.push(['Amount', amountText(b)], ['Booked on', stamp(b.createdAt)]);
   return rows;
 };
@@ -103,12 +107,13 @@ const pageItems = (current, total) => {
 };
 
 function MyBookings() {
-  const user = getUser();
+  const user = useUser();
   const [page, setPage] = useState(1);
   const [data, setData] = useState(null); // null = still loading
   const [error, setError] = useState('');
   const [updatedAt, setUpdatedAt] = useState(null);
   const [selected, setSelected] = useState(null); // the booking shown in the Details window
+  const [cancelling, setCancelling] = useState(false);
   const lastRequest = useRef(0);
 
   // asks the server for the current page. Safe to call as often as we like.
@@ -143,6 +148,28 @@ function MyBookings() {
     };
   }, [load]);
 
+  const cancel = (b) =>
+    Modal.confirm({
+      title: 'Cancel this booking?',
+      content: `${titleOf(b)} will be cancelled${b.kind === 'room' ? ' and its slot given back' : ''}. If you already paid, the shop will contact you about your refund.`,
+      okText: 'Yes, cancel it',
+      cancelText: 'Keep it',
+      okButtonProps: { danger: true },
+      centered: true,
+      onOk: async () => {
+        setCancelling(true);
+        try {
+          await axios.post(`${API_URL}/my/bookings/${b.kind}/${b._id}/cancel`);
+          message.success('Your booking was cancelled.');
+          await load();
+        } catch (err) {
+          message.error(err.response?.data?.message || 'Could not cancel the booking.');
+        } finally {
+          setCancelling(false);
+        }
+      },
+    });
+
   const bookings = data?.bookings || [];
   const totalPages = data?.totalPages || 1;
   const current = data?.page || page;
@@ -158,16 +185,7 @@ function MyBookings() {
         <Link to="/account" className="mb-back" aria-label="Back to dashboard">
           <ArrowLeftOutlined />
         </Link>
-        <Link to="/account/profile" className="cd-avatar" aria-label="My profile">
-          {user?.avatar ? (
-            <img src={user.avatar} alt="" className="cd-avatar-img" />
-          ) : (
-            <>
-              <span className="cd-avatar-sky" />
-              <span className="cd-avatar-hill" />
-            </>
-          )}
-        </Link>
+        <HeaderAvatar user={user} />
       </header>
 
       <main className="mb-main">
@@ -223,7 +241,13 @@ function MyBookings() {
                             <small>{whenOf(b)}</small>
                           </td>
                           <td>{amountText(b)}</td>
-                          <td><Link to={`/receipts/${b.ref}`} className="mb-view">View</Link></td>
+                          <td>
+                            {b.receiptId ? (
+                              <Link to={`/receipts/${b.receiptId}`} className="mb-view">View</Link>
+                            ) : (
+                              <small title={b.kind === 'grooming' ? 'The receipt is made once the shop records your payment.' : ''}>-</small>
+                            )}
+                          </td>
                           <td><span className={`mb-status ${status.cls}`}>{status.label}</span></td>
                           <td>
                             <button type="button" className="mb-view" onClick={() => setSelected(b)}>View</button>
@@ -263,7 +287,24 @@ function MyBookings() {
         )}
       </main>
 
-      <Modal open={!!shown} title="Booking Details" footer={null} centered onCancel={() => setSelected(null)}>
+      <Modal
+        open={!!shown}
+        title="Booking Details"
+        centered
+        onCancel={() => setSelected(null)}
+        footer={
+          shown && (
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+              {shown.receiptId && <Link to={`/receipts/${shown.receiptId}`} className="mb-view">Open receipt</Link>}
+              {shown.canCancel && (
+                <button type="button" className="mb-view" disabled={cancelling} onClick={() => cancel(shown)}>
+                  Cancel booking
+                </button>
+              )}
+            </div>
+          )
+        }
+      >
         {shown && (
           <dl className="mb-details">
             {detailRows(shown).map(([label, value]) => (

@@ -14,6 +14,11 @@ const UserSchema = new mongoose.Schema(
     twoFactorLastStep: { type: Number, default: 0, select: false }, // newest 30-second step already used, so a code can't be used twice
     twoFactorRecoveryCodes: { type: [String], select: false }, // hashed one-time recovery codes
     avatar: { type: String, default: '' }, // profile photo as a small data URL (resized by the browser)
+    // extra profile details (optional). The login stays "identifier"; for older accounts email /
+    // contactNumber are filled from the identifier when they are sent to the browser (see toJSON below)
+    username: { type: String, trim: true, lowercase: true, unique: true, sparse: true },
+    email: { type: String, default: '', trim: true, lowercase: true },
+    contactNumber: { type: String, default: '', trim: true },
     role: {
       type: String,
       enum: ['admin', 'staff', 'groomer', 'customer'],
@@ -48,6 +53,11 @@ UserSchema.set('toJSON', {
     delete ret.twoFactorRecoveryCodes;
     delete ret.__v;
     delete ret.id;
+    // the e-mail / contact number shown on My Profile: the login one is always filled in
+    const loginIsEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ret.identifier || '');
+    if (!ret.email && loginIsEmail) ret.email = ret.identifier;
+    if (!ret.contactNumber && !loginIsEmail) ret.contactNumber = ret.identifier;
+    ret.username = ret.username || '';
     return ret;
   },
 });

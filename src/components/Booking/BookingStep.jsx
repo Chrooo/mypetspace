@@ -47,7 +47,9 @@ function BookingStep({ step, title, subtitle, planned, children, canNext = true,
 
   const labels = type === 'room' ? ROOM_STEP_LABELS : STEP_LABELS;
   const isLast = index === flow.length - 1;
-  const backTo = index > 0 ? `/book/${type}/${flow[index - 1]}` : '/services';
+  // the first step goes back to the page the booking started from: Services (grooming) or Rooms (room)
+  const firstBack = type === 'room' ? '/rooms' : '/services';
+  const backTo = index > 0 ? `/book/${type}/${flow[index - 1]}` : firstBack;
   const nextTo = isLast ? '/receipts/sample' : `/book/${type}/${flow[index + 1]}`;
   const nextLabel = step === 'confirmation' ? 'Confirm booking' : isLast ? 'Submit payment' : 'Next';
   const nextContent = (
@@ -69,7 +71,14 @@ function BookingStep({ step, title, subtitle, planned, children, canNext = true,
 
       {!hideActions && (
       <div className="page-actions">
-        <Link to={backTo} state={step === 'confirmation' ? { fromConfirmation: true } : undefined} className="btn btn-outline-teal">Back</Link>
+        <Link
+          to={backTo}
+          state={step === 'confirmation' ? { fromConfirmation: true } : undefined}
+          onClick={() => window.scrollTo(0, 0)}
+          className="btn btn-outline-teal"
+        >
+          Back
+        </Link>
         {customNext ||
           (canNext ? (
             <Link to={nextTo} className="btn btn-pink">{nextContent}</Link>

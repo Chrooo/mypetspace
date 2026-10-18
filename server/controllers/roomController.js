@@ -141,4 +141,4 @@ const createReservation = async (req, res) => {
   }
 };
 
-module.exports = { getAvailability, getSlots, createReservation };
+module.exports = { getAvailability, getSlots, createReservation, takenSlots, FULL_MESSAGE };

@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const Appointment = require('../models/Appointment');
 const { STATUSES, NEXT } = require('../models/Appointment');
-const Payment = require('../models/Payment');
 const UserModel = require('../models/User');
 const { logAction } = require('../utils/audit');
 
@@ -118,35 +117,6 @@ const updateAppointment = async (req, res) => {
   }
 };
 
-// GET /api/staff/bookings?type=hotel&date=&search=&page=&pageSize=
-// Hotel side of the Bookings page: the payments already recorded for hotel stays
-// (there is no room reservation record yet). Grooming bookings come from /staff/appointments.
-const listBookings = async (req, res) => {
-  try {
-    const { page, pageSize, skip } = paging(req.query);
-    const filter = {};
-    if (req.query.search && req.query.search.trim()) {
-      const text = textPattern(req.query.search);
-      filter.$or = [{ customerName: text }, { transactionNo: text }, { method: text }];
-    }
-    const range = dayRange(req.query.date);
-    if (range) filter.createdAt = range;
-
-    const [rows, total] = await Promise.all([
-      Payment.find(filter).sort({ createdAt: -1 }).skip(skip).limit(pageSize),
-      Payment.countDocuments(filter),
-    ]);
-    const bookings = rows.map((p) => ({
-      _id: p._id, ref: refOf('H', p._id), customerName: p.customerName, description: 'Hotel stay',
-      total: p.amount, paymentStatus: 'paid', paymentMethod: p.method, transactionNo: p.transactionNo, date: p.createdAt,
-    }));
-    res.json({ bookings, total, page, pageSize });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Internal Server Error' });
-  }
-};
-
 // PUT /api/staff/bookings/:id/payment   body: { method, total? }   (grooming bookings)
 const recordPayment = async (req, res) => {
   try {
@@ -180,4 +150,4 @@ const recordPayment = async (req, res) => {
   }
 };
 
-module.exports = { listAppointments, listGroomers, updateAppointment, listBookings, recordPayment };
+module.exports = { listAppointments, listGroomers, updateAppointment, recordPayment };

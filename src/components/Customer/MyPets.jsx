@@ -9,8 +9,9 @@ import {
   DeleteOutlined,
   EditOutlined,
 } from '@ant-design/icons';
-import { API_URL, getUser } from '../../auth';
+import { API_URL, useUser } from '../../auth';
 import logo from '../../assets/logo.png';
+import { HeaderAvatar } from './Avatar';
 import './CustomerDashboard.css'; // top bar styles are shared with the dashboard
 import './MyPets.css';
 
@@ -74,7 +75,7 @@ const PawIcon = () => (
 );
 
 function MyPets() {
-  const user = getUser();
+  const user = useUser();
   const [pets, setPets] = useState(null); // null = still loading
   const [loadError, setLoadError] = useState('');
   const [notice, setNotice] = useState('');
@@ -226,16 +227,7 @@ function MyPets() {
         <Link to="/account" className="mp-back" aria-label="Back to dashboard">
           <ArrowLeftOutlined />
         </Link>
-        <Link to="/account/profile" className="cd-avatar" aria-label="My profile">
-          {user?.avatar ? (
-            <img src={user.avatar} alt="" className="cd-avatar-img" />
-          ) : (
-            <>
-              <span className="cd-avatar-sky" />
-              <span className="cd-avatar-hill" />
-            </>
-          )}
-        </Link>
+        <HeaderAvatar user={user} />
       </header>
 
       <main className="mp-main">

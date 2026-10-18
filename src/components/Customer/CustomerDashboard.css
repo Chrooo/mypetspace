@@ -19,7 +19,8 @@
   padding: 0 6vw;
   background: var(--cd-sky);
 }
-.cd-logo { display: block; height: 76px; width: auto; mix-blend-mode: multiply; }
+/* the logo file is transparent, so it is shown as is ("multiply" tinted it blue on the sky-blue bar) */
+.cd-logo { display: block; height: 76px; width: auto; }
 .cd-top-title { margin-left: auto; margin-right: 6vw; font-size: 18px; font-weight: 700; color: var(--cd-teal); }
 
 .cd-avatar {
@@ -96,3 +97,19 @@
   .cd-top-title { margin-right: 12px; font-size: 15px; }
   .cd-grid { grid-template-columns: 1fr; }
 }
+/* back button (goes to the landing page) */
+.cd-back {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin-right: 14px;
+  font-size: 15px;
+  color: #fff;
+  background: var(--cd-teal);
+  border: 2px solid #fff;
+  border-radius: 50%;
+  text-decoration: none;
+}
+.cd-back:hover { background: #0d7a7f; color: #fff; }
+.cd-top .cd-top-title { margin-right: 18px; }
