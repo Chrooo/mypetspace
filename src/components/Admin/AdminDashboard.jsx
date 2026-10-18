@@ -3,13 +3,14 @@ import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { BookFilled, DollarCircleFilled, FileAddFilled, LogoutOutlined, SafetyCertificateOutlined, TeamOutlined } from '@ant-design/icons';
 import AdminLayout from './AdminLayout';
-import { API_URL, getUser, logout } from '../../auth';
+import { API_URL, getUser } from '../../auth';
+import confirmLogout from '../Auth/confirmLogout';
 
 const CARDS = [
-  { title: 'USERS', desc: 'Modify, View, and Manage Users', to: '/manage/users', icon: <TeamOutlined /> },
-  { title: 'REGISTER', desc: 'Create New Account for Staffs and Groomers', to: '/admin/register', icon: <FileAddFilled /> },
-  { title: 'PAYMENTS', desc: 'View, and Manage Transaction Payments', to: '/admin/payments', icon: <DollarCircleFilled /> },
-  { title: 'AUDIT LOGS', desc: 'View, and Manage Activity History of the System', to: '/admin/audit-logs', icon: <BookFilled /> },
+  { title: 'Users', desc: 'View and manage user accounts.', to: '/manage/users', icon: <TeamOutlined /> },
+  { title: 'Register', desc: 'Create accounts for staff and groomers.', to: '/admin/register', icon: <FileAddFilled /> },
+  { title: 'Payments', desc: 'View and manage payments.', to: '/admin/payments', icon: <DollarCircleFilled /> },
+  { title: 'Audit Logs', desc: 'See what happened in the system.', to: '/admin/audit-logs', icon: <BookFilled /> },
 ];
 
 const peso = (n) => `₱${Number(n || 0).toLocaleString('en-PH')}`;
@@ -65,12 +66,12 @@ function AdminDashboard() {
         ))}
       </div>
 
-      {data?.recent.length > 0 && (
+      {data?.recent?.length > 0 && (
         <section className="adm-recent">
           <h2>
             Recent Activity <Link to="/admin/audit-logs">View all</Link>
           </h2>
-          {data.recent.map((log) => (
+          {data.recent.slice(0, 5).map((log) => (
             <div key={log._id} className="adm-recent-row">
               <span>
                 {log.action}
@@ -90,10 +91,7 @@ function AdminDashboard() {
         <button
           type="button"
           className="adm-link adm-logout"
-          onClick={() => {
-            logout();
-            navigate('/');
-          }}
+          onClick={() => confirmLogout(() => navigate('/'))}
         >
           Logout <LogoutOutlined />
         </button>

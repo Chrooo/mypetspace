@@ -45,6 +45,7 @@ import GroomerServices from './components/Groomer/GroomerServices';
 import AdminDashboard from './components/Admin/AdminDashboard';
 import AuditLogs from './components/Admin/AuditLogs';
 import AdminPayments from './components/Admin/AdminPayments';
+import AdminProfile from './components/Admin/AdminProfile';
 import AdminRegister from './components/Admin/AdminRegister';
 import StaffDashboard from './components/Staff/StaffDashboard';
 import ManageReservations from './components/Manage/ManageReservations';
@@ -100,6 +101,7 @@ function App() {
       <Route element={guard(['customer'])}>
         <Route path="/account" element={<CustomerDashboard />} />
         <Route path="/account/profile" element={<Profile />} />
+        <Route path="/account/bookings" element={<MyBookings />} />
         <Route path="/account/reservations" element={<MyReservations />} />
         <Route path="/account/appointments" element={<MyAppointments />} />
         <Route path="/account/pets" element={<MyPets />} />
@@ -121,9 +123,11 @@ function App() {
         <Route path="/admin/audit-logs" element={<AuditLogs />} />
         <Route path="/admin/payments" element={<AdminPayments />} />
         <Route path="/admin/register" element={<AdminRegister />} />
+        <Route path="/admin/profile" element={<AdminProfile />} />
       </Route>
       <Route element={guard(['staff'])}>
         <Route path="/staff" element={<StaffDashboard />} />
+        <Route path="/staff/profile" element={<AdminProfile />} />
       </Route>
       <Route element={guard(['admin', 'staff'])}>
         <Route path="/manage/reservations" element={<ManageReservations />} />

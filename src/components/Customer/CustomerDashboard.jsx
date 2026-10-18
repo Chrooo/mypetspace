@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { LogoutOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
-import { getUser, logout } from '../../auth';
+import { getUser } from '../../auth';
+import confirmLogout from '../Auth/confirmLogout';
 import logo from '../../assets/logo.png';
 import './CustomerDashboard.css';
 
@@ -63,10 +64,7 @@ function CustomerDashboard() {
   const navigate = useNavigate();
   const user = getUser(); // the route guard makes sure a user exists
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
+  const handleLogout = () => confirmLogout(() => navigate('/'));
 
   return (
     <div className="cd">

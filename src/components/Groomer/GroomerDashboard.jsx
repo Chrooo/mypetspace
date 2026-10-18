@@ -1,7 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { LogoutOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
 import GroomerLayout from './GroomerLayout';
-import { getUser, logout } from '../../auth';
+import { getUser } from '../../auth';
+import confirmLogout from '../Auth/confirmLogout';
 
 const svg = { viewBox: '0 0 64 64', 'aria-hidden': true };
 
@@ -45,9 +46,9 @@ const ProfileIcon = () => (
 );
 
 const CARDS = [
-  { title: 'APPOINTMENTS', desc: 'View and update your grooming appointments', to: '/groomer/appointments', Icon: AppointmentsIcon },
-  { title: 'SERVICES', desc: 'Prices and inclusions of every grooming service', to: '/groomer/services', Icon: ServicesIcon },
-  { title: 'PROFILE', desc: 'View and manage your account details', to: '/groomer/profile', Icon: ProfileIcon },
+  { title: 'Appointments', desc: 'View and update your grooming appointments.', to: '/groomer/appointments', Icon: AppointmentsIcon },
+  { title: 'Services', desc: 'Prices and what each service includes.', to: '/groomer/services', Icon: ServicesIcon },
+  { title: 'Profile', desc: 'Your account details.', to: '/groomer/profile', Icon: ProfileIcon },
 ];
 
 function GroomerDashboard() {
@@ -56,6 +57,7 @@ function GroomerDashboard() {
 
   return (
     <GroomerLayout>
+      <div className="gr-dash">
       <h1 className="gr-h1">Welcome, {user?.fullName}!</h1>
       <p className="gr-sub">This is the Groomer Dashboard</p>
 
@@ -80,13 +82,11 @@ function GroomerDashboard() {
         <button
           type="button"
           className="gr-link gr-logout"
-          onClick={() => {
-            logout();
-            navigate('/');
-          }}
+          onClick={() => confirmLogout(() => navigate('/'))}
         >
           Logout <LogoutOutlined />
         </button>
+      </div>
       </div>
     </GroomerLayout>
   );

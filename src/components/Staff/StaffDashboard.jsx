@@ -1,7 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { LogoutOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
 import StaffLayout from './StaffLayout';
-import { getUser, logout } from '../../auth';
+import { getUser } from '../../auth';
+import confirmLogout from '../Auth/confirmLogout';
 
 /* ---------- big pink icons for the cards (same style as the user dashboard) ---------- */
 const line = { viewBox: '0 0 64 64', fill: 'none', stroke: 'currentColor', strokeWidth: 3, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': true };
@@ -13,19 +14,10 @@ const ProfileIcon = () => (
   </svg>
 );
 
-const CheckInIcon = () => (
+const HotelStaysIcon = () => (
   <svg viewBox="0 0 64 64" fill="currentColor" aria-hidden="true">
     <circle cx="32" cy="32" r="28" />
     <path d="M18 33l10 10 19-21" fill="none" stroke="#fff" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
-const CheckOutIcon = () => (
-  <svg {...line}>
-    <rect x="22" y="12" width="38" height="42" rx="3" />
-    <path d="M32 6v12M50 6v12M22 26h38" />
-    <circle cx="18" cy="38" r="14" fill="#fff" />
-    <path d="M18 29v10l6 4" />
   </svg>
 );
 
@@ -48,11 +40,11 @@ const RoomsIcon = () => (
   </svg>
 );
 
-// Appointments and Bookings are one page now.
+// Check-ins and Check-outs opened the same page, so they are one card now.
+// Appointments and Bookings are one page too.
 const CARDS = [
-  { label: 'My Profile', desc: 'Your account details.', to: '/security', Icon: ProfileIcon },
-  { label: 'Check-ins', desc: 'Hotel stays for pets.', to: '/manage/reservations', Icon: CheckInIcon },
-  { label: 'Check-outs', desc: 'Hotel stays going home.', to: '/manage/reservations', Icon: CheckOutIcon },
+  { label: 'My Profile', desc: 'Your photo and account details.', to: '/staff/profile', Icon: ProfileIcon },
+  { label: 'Hotel Stays', desc: 'Pets checking in and checking out.', to: '/manage/reservations', Icon: HotelStaysIcon },
   { label: 'Bookings', desc: 'Grooming appointments, hotel stays and payments.', to: '/manage/bookings', Icon: BookingsIcon },
   { label: 'Rooms', desc: 'Room availability and their status.', to: '/manage/rooms', Icon: RoomsIcon },
 ];
@@ -87,11 +79,8 @@ function StaffDashboard() {
           </button>
           <button
             type="button"
-            className="sd-link"
-            onClick={() => {
-              logout();
-              navigate('/');
-            }}
+            className="sd-link sd-logout"
+            onClick={() => confirmLogout(() => navigate('/'))}
           >
             Logout <LogoutOutlined />
           </button>
