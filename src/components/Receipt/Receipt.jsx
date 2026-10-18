@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import dayjs from 'dayjs';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { getUser } from '../../auth';
 import { Modal, Spin } from 'antd';
 import PageShell from '../Layout/PageShell';
 import logo from '../../assets/logo.png';
@@ -17,10 +18,13 @@ const TBC = 'To be confirmed by the shop';
 //    saved on the server. Print / Save as PDF opens the print window; when it closes, the "book another?"
 //    pop-up appears.
 //  - Opened later (from My Payments, or on another device) it is loaded from the server.
-//  - An id the server does not know (like "sample") shows the planned page.
+//  - An id the server does not know shows "We could not find that receipt".
 function Receipt() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const role = getUser()?.role;
+  // the back arrow: a customer goes to their payments, staff and admin back to the bookings list
+  const backTo = role === 'customer' ? '/account/payments' : '/manage/reservations';
   const local = useMemo(() => readReceipt(id), [id]); // made in this tab, just now
   const [fetched, setFetched] = useState({ id: null, receipt: null }); // loaded from the server
   const [askAnother, setAskAnother] = useState(false);
@@ -67,7 +71,7 @@ function Receipt() {
 
   if (loading) {
     return (
-      <PageShell title="Receipt" subtitle="Loading your receipt...">
+      <PageShell title="Receipt" subtitle="Loading your receipt..." account backTo={backTo}>
         <div style={{ padding: '40px 0', textAlign: 'center' }}><Spin size="large" /></div>
       </PageShell>
     );
@@ -75,23 +79,13 @@ function Receipt() {
 
   if (!receipt) {
     return (
-      <PageShell
-        title="Receipt"
-        subtitle={`Receipt: ${id}`}
-        planned={[
-          'Receipt number (like MPS-2026-000001), date and time',
-          'Customer, pet and booking reference',
-          'Items: services or room nights with price',
-          'Total, amount paid in this receipt and remaining balance',
-          'Payment method and reference number',
-          'Verified by (staff name) and shop details',
-        ]}
-      >
-        <div className="page-actions" style={{ marginTop: 0, marginBottom: 28 }}>
-          <button type="button" className="btn btn-pink" onClick={() => window.print()}>
-            Print / Save as PDF
-          </button>
-          <Link to="/dashboard" className="btn btn-outline-teal">Back to dashboard</Link>
+      <PageShell title="Receipt" subtitle="We could not find that receipt." account backTo={backTo}>
+        <p style={{ maxWidth: 520 }}>
+          The receipt <b>{id}</b> does not exist, or it belongs to another account. A grooming receipt is only made once the shop
+          has recorded your payment.
+        </p>
+        <div className="page-actions" style={{ marginTop: 18 }}>
+          <Link to={backTo} className="btn btn-outline-teal">{role === 'customer' ? 'Back to my payments' : 'Back to hotel stays'}</Link>
         </div>
       </PageShell>
     );
@@ -115,7 +109,6 @@ function Receipt() {
           ['Room:', r.roomName],
           ['Dates:', r.datesText],
           ['Pet/s:', r.petText],
-          ['Slot:', `Slot ${r.slot}`],
           ['Check-In:', r.checkIn],
           ['Check-Out:', r.checkOut],
           ['Price:', r.priceText],
@@ -123,7 +116,7 @@ function Receipt() {
         ];
 
   return (
-    <PageShell title="Receipt" subtitle="This is your receipt.">
+    <PageShell title="Receipt" subtitle="This is your receipt." account backTo={backTo}>
       <article className="rc-card" aria-label="Booking receipt">
         <header className="rc-head">
           <img src={logo} alt="My Pet Space" className="rc-logo" />

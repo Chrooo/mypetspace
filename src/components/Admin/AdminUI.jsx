@@ -30,7 +30,9 @@ export function SortSelect({ value, onChange }) {
 }
 
 // The maroon table with the numbered first column and page numbers underneath.
-//   columns: [{ title, render(row), bold? }]
+//   columns: [{ title, render(row), bold?, joinPrev? }]
+//   joinPrev: this column has no heading of its own: the heading before it stretches over both
+//   (used for the two Action buttons, View and Confirm, side by side)
 function DataTable({ columns, rows, page, pageSize, total, onPage, loading, empty = 'Nothing to show yet.' }) {
   return (
     <Spin spinning={!!loading}>
@@ -39,17 +41,19 @@ function DataTable({ columns, rows, page, pageSize, total, onPage, loading, empt
           <thead>
             <tr>
               <th>No.</th>
-              {columns.map((c) => (
-                <th key={c.title} className={c.bold ? 'b' : ''}>{c.title}</th>
-              ))}
+              {columns.map((c, i) =>
+                c.joinPrev ? null : (
+                  <th key={c.title} className={c.bold ? 'b' : ''} colSpan={columns[i + 1]?.joinPrev ? 2 : 1}>{c.title}</th>
+                )
+              )}
             </tr>
           </thead>
           <tbody>
             {rows.map((row, i) => (
               <tr key={row._id}>
                 <td>{(page - 1) * pageSize + i + 1}</td>
-                {columns.map((c) => (
-                  <td key={c.title}>{c.render(row)}</td>
+                {columns.map((c, i) => (
+                  <td key={`${c.title}-${i}`}>{c.render(row)}</td>
                 ))}
               </tr>
             ))}

@@ -239,4 +239,4 @@ const getReceipt = async (req, res) => {
   }
 };
 
-module.exports = { saveRoomReceipt, listMyPayments, getReceipt };
+module.exports = { saveRoomReceipt, listMyPayments, getReceipt, numbersFor, METHOD_LABELS, manila };

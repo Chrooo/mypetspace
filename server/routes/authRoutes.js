@@ -10,6 +10,8 @@ const twoFactor = require('../controllers/twoFactorController');
 const adminController = require('../controllers/adminController');
 const groomerController = require('../controllers/groomerController');
 const staffAppointmentsController = require('../controllers/staffAppointmentsController');
+const staffReservations = require('../controllers/staffReservationsController');
+const staffBookings = require('../controllers/staffBookingsController');
 const { protect, authorize } = require('../middleware/authMiddleware');
 
 
@@ -27,6 +29,7 @@ router.put('/pets/:id', protect, petController.updatePet);
 
 // my bookings: every hotel reservation and grooming appointment of the logged-in customer
 router.get('/my/bookings', protect, authorize('customer'), myBookingsController.listMyBookings);
+router.post('/my/bookings/:kind/:id/cancel', protect, authorize('customer'), myBookingsController.cancelMyBooking);
 // my payments and receipts (the receipt of a hotel booking is saved right after Pay Now)
 router.get('/my/payments', protect, authorize('customer'), paymentsController.listMyPayments);
 router.post('/my/payments/receipt', protect, authorize('customer'), paymentsController.saveRoomReceipt);
@@ -52,11 +55,19 @@ router.post('/2fa/disable', protect, twoFactor.disable);
 router.get('/groomer/appointments', protect, authorize('groomer'), groomerController.listMyAppointments);
 router.put('/groomer/appointments/:id', protect, authorize('groomer'), groomerController.updateMyAppointment);
 
-// staff and admin: every grooming appointment, and the bookings/payments list
+// staff and admin: every grooming appointment, and recording its payment
 router.get('/staff/appointments', protect, authorize('staff', 'admin'), staffAppointmentsController.listAppointments);
 router.put('/staff/appointments/:id', protect, authorize('staff', 'admin'), staffAppointmentsController.updateAppointment);
 router.get('/staff/groomers', protect, authorize('staff', 'admin'), staffAppointmentsController.listGroomers);
-router.get('/staff/bookings', protect, authorize('staff', 'admin'), staffAppointmentsController.listBookings);
+// staff and admin: hotel stays (list, check in / out, cancel, set the Peak price, record the balance) and room occupancy
+router.get('/staff/reservations', protect, authorize('staff', 'admin'), staffReservations.listReservations);
+router.put('/staff/reservations/:id', protect, authorize('staff', 'admin'), staffReservations.updateReservation);
+// staff and admin book for a customer (walk-in or phone call), with the payment taken on the spot
+router.get('/staff/customers', protect, authorize('staff', 'admin'), staffBookings.listCustomers);
+router.post('/staff/customers', protect, authorize('staff', 'admin'), staffBookings.createCustomer);
+router.post('/staff/appointments', protect, authorize('staff', 'admin'), staffBookings.createAppointmentFor);
+router.post('/staff/reservations', protect, authorize('staff', 'admin'), staffBookings.createReservationFor);
+router.get('/staff/rooms', protect, authorize('staff', 'admin'), staffReservations.roomsOccupancy);
 router.put('/staff/bookings/:id/payment', protect, authorize('staff', 'admin'), staffAppointmentsController.recordPayment);
 
 router.post('/createStaff', protect, authorize('admin'), authController.createStaff);

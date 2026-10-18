@@ -1,19 +1,10 @@
-import DashboardShell from '../Layout/DashboardShell';
+import { Navigate } from 'react-router-dom';
+import { getUser } from '../../auth';
 
+// Payments are already handled by two finished pages, so this address just opens the right one:
+// admin -> the payments list, staff -> Bookings (record a grooming payment) / Hotel Stays (record a hotel balance).
 function ManagePayments() {
-  return (
-    <DashboardShell
-      title="Payments and Receipts"
-      back
-      planned={[
-        'All payments, filter by status',
-        'Verify or reject proof of payment',
-        'Record cash and walk-in payments',
-        'Record refunds',
-        'Open and reprint receipts; void a receipt (admin only)',
-      ]}
-    />
-  );
+  return <Navigate to={getUser()?.role === 'admin' ? '/admin/payments' : '/manage/bookings'} replace />;
 }
 
 export default ManagePayments;

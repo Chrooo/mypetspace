@@ -5,10 +5,11 @@ import './Layout.css';
 
 // Frame for the public pages and the booking steps.
 // links: [{ label, to, primary }]  ->  buttons that open other pages
-function PageShell({ title, subtitle, back, links = [], planned, children }) {
+// account / backTo: see SiteHeader (the Receipt page uses the back-arrow + avatar header)
+function PageShell({ title, subtitle, back, links = [], planned, account = false, backTo, children }) {
   return (
     <div className="page-shell">
-      <SiteHeader />
+      <SiteHeader account={account} backTo={backTo} />
       <main className="page-main">
         {back && (
           <Link to={back} className="page-back">

@@ -51,10 +51,11 @@
 /* row actions and statuses (Bookings page) */
 .sd .adm-act { padding: 0; border: 0; background: none; color: var(--sd-pink); font: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; }
 .sd .adm-act:hover { text-decoration: none; }
-.sd .adm-st { font-weight: 700; }
+.sd .adm-st { font-weight: 500; }
+.sd .adm-table td .adm-act { text-decoration: none; font-weight: 500; }
 .sd .adm-st.pending, .sd .adm-st.unpaid { color: #e8821a; }
 .sd .adm-st.confirmed { color: #2b6fe0; }
-.sd .adm-st.in_progress { color: #8a3fd1; }
+.sd .adm-st.in_progress, .sd .adm-st.checked_in { color: #8a3fd1; }
 .sd .adm-st.completed, .sd .adm-st.paid { color: #2e9e12; }
 .sd .adm-st.cancelled { color: #e11d2e; }
 

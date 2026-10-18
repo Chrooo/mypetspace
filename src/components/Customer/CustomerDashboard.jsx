@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
-import { LogoutOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
-import { getUser } from '../../auth';
+import { ArrowLeftOutlined, LogoutOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
+import { API_URL, saveUser, useUser } from '../../auth';
 import confirmLogout from '../Auth/confirmLogout';
 import logo from '../../assets/logo.png';
 import { HeaderAvatar } from './Avatar';

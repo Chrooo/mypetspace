@@ -143,4 +143,4 @@ const createAppointment = async (req, res) => {
   }
 };
 
-module.exports = { getAvailability, getAssignment, createAppointment };
+module.exports = { getAvailability, getAssignment, createAppointment, hourFilter, findFreeGroomer, checkSlot, SERVICES, PACKAGES, FULL_MESSAGE };

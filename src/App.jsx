@@ -29,8 +29,6 @@ import Receipt from './components/Receipt/Receipt';
 // Fur Parent (customer)
 import CustomerDashboard from './components/Customer/CustomerDashboard';
 import Profile from './components/Customer/Profile';
-import MyReservations from './components/Customer/MyReservations';
-import MyAppointments from './components/Customer/MyAppointments';
 import MyPets from './components/Customer/MyPets';
 import MyPayments from './components/Customer/MyPayments'
 import MyBookings from './components/Customer/MyBookings';
@@ -101,10 +99,10 @@ function App() {
         <Route path="/account" element={<CustomerDashboard />} />
         <Route path="/account/profile" element={<Profile />} />
         <Route path="/account/bookings" element={<MyBookings />} />
-        <Route path="/account/reservations" element={<MyReservations />} />
-        <Route path="/account/appointments" element={<MyAppointments />} />
+        {/* reservations and appointments are one list now: My Bookings */}
+        <Route path="/account/reservations" element={<Navigate to="/account/bookings" replace />} />
+        <Route path="/account/appointments" element={<Navigate to="/account/bookings" replace />} />
         <Route path="/account/pets" element={<MyPets />} />
-        <Route path="/account/bookings" element={<MyBookings />} />
         <Route path="/account/payments" element={<MyPayments />} />
       </Route>
 
