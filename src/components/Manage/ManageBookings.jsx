@@ -26,7 +26,7 @@ const peso = (n) => `₱${Number(n || 0).toLocaleString('en-PH')}`;
 // One page for bookings AND appointments (design: "Staff Bookings").
 //   Table: No., Date & Time, Customer, Pet, Services / Room, Groomer / Stay, Status, Action (View | Confirm).
 //   View opens the details window: change the status, assign the groomer, record a payment, open the receipt.
-//   Confirm turns a Pending booking into Confirmed.
+//   Confirm turns a Pending booking into Confirmed. It stays visible but is disabled once the booking is not Pending.
 //   New booking: staff book for a walk-in or phone customer, with cash (or other) payment taken on the spot.
 function ManageBookings() {
   const [rows, setRows] = useState([]);
@@ -164,10 +164,17 @@ function ManageBookings() {
   const viewing = rows.find((r) => r._id === viewId) || null;
   const statusText = (b) => <span className={`adm-st ${b.status}`}>{STATUS_LABEL[b.status]}</span>;
   const actions = (b) => <button className="adm-act" onClick={() => setViewId(b._id)}>View</button>;
-  const confirm = (b) =>
-    b.status === 'pending' ? (
-      <button className="adm-act" onClick={() => openConfirm(b)}>Confirm</button>
-    ) : null;
+  // the Confirm button stays on every row; once the booking is no longer Pending it is greyed out
+  const confirm = (b) => (
+    <button
+      className="adm-act"
+      disabled={b.status !== 'pending'}
+      title={b.status === 'pending' ? 'Confirm this booking' : `Already ${STATUS_LABEL[b.status].toLowerCase()}`}
+      onClick={() => openConfirm(b)}
+    >
+      Confirm
+    </button>
+  );
 
   const groomingColumns = [
     { title: 'Date & Time', render: (a) => dayjs(a.scheduledAt).format('MMM DD, YYYY - h:mm A') },
