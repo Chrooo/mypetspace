@@ -46,6 +46,14 @@ const checkAge = (_, value) => {
   return Promise.resolve();
 };
 
+// weight in kg: 0.1 to 100 (grooming prices depend on it)
+const checkWeight = (_, value) => {
+  const v = String(value ?? '').trim();
+  if (!v) return Promise.reject(new Error('Enter the weight'));
+  if (!/^\d+(\.\d+)?$/.test(v) || Number(v) < 0.1 || Number(v) > 100) return Promise.reject(new Error('Enter a weight from 0.1 to 100 kg'));
+  return Promise.resolve();
+};
+
 const STEP_ONE_FIELDS = ['firstName', 'lastName', 'identifier', 'password', 'confirmPassword'];
 
 function SignUp() {
@@ -89,6 +97,7 @@ function SignUp() {
           name: values.petName,
           breed: values.breed,
           age: values.age,
+          weight: values.weight,
           gender: values.gender,
           type: values.petType,
           notes: values.notes || '',
@@ -193,12 +202,16 @@ function SignUp() {
                 <Input className="lg-input" placeholder="Pet Name *" maxLength={50} />
               </Form.Item>
 
+              <Form.Item name="breed" rules={breedRules}>
+                <Input className="lg-input" placeholder="Breed *" maxLength={50} />
+              </Form.Item>
+
               <div className="su-row">
-                <Form.Item name="breed" rules={breedRules}>
-                  <Input className="lg-input" placeholder="Breed *" maxLength={50} />
-                </Form.Item>
                 <Form.Item name="age" rules={[{ validator: checkAge }]}>
                   <Input className="lg-input" placeholder="Age (years) *" inputMode="decimal" maxLength={5} />
+                </Form.Item>
+                <Form.Item name="weight" rules={[{ validator: checkWeight }]}>
+                  <Input className="lg-input" placeholder="Weight (kg) *" inputMode="decimal" maxLength={5} />
                 </Form.Item>
               </div>
 
