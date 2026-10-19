@@ -6,6 +6,7 @@ const Appointment = require('../models/Appointment');
 const RoomReservation = require('../models/RoomReservation');
 const Payment = require('../models/Payment');
 const { logAction } = require('../utils/audit');
+const { sendHotelEmail } = require('../utils/mailer');
 const { cleanPet } = require('./petController');
 const { cleanIdentifier, validate } = require('./authController');
 const { hourFilter, findFreeGroomer, checkSlot, SERVICES, PACKAGES, FULL_MESSAGE: SLOT_FULL } = require('./appointmentController');
@@ -249,6 +250,7 @@ const createReservationFor = async (req, res) => {
     }
 
     await logAction('Room Booked by Staff', req.user, { affected: `${pet.name} (${customer.fullName}) - ${room.name} #${slotNo}` });
+    sendHotelEmail('booked', reservation, customer);
     res.status(201).json({ reservation, receiptNo });
   } catch (err) {
     serverError(res, err);

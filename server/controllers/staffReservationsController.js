@@ -4,6 +4,7 @@ const { STATUSES, NEXT } = require('../models/RoomReservation');
 const Payment = require('../models/Payment');
 const UserModel = require('../models/User');
 const { logAction } = require('../utils/audit');
+const { sendHotelEmail } = require('../utils/mailer');
 const { ROOM_TYPES, todayPH } = require('../utils/rooms');
 const { numbersFor, METHOD_LABELS, manila } = require('./paymentsController');
 
@@ -193,6 +194,10 @@ const updateReservation = async (req, res) => {
     if (payment) await payment.save();
 
     for (const [action, affected] of logs) await logAction(action, req.user, { affected });
+
+    // the stay just became Completed: tell the customer (only if they have an email)
+    if (status === 'completed') sendHotelEmail('completed', r, await UserModel.findById(r.customer).select('firstName lastName identifier email'));
+
     res.json({ reservation: serialize(r, payment) });
   } catch (err) {
     serverError(res, err);

@@ -51,6 +51,7 @@
 /* row actions and statuses (Bookings page) */
 .sd .adm-act { padding: 0; border: 0; background: none; color: var(--sd-pink); font: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; }
 .sd .adm-act:hover { text-decoration: none; }
+.sd .adm-act:disabled { color: #9a9a9a; cursor: not-allowed; text-decoration: none; opacity: .7; }
 .sd .adm-st { font-weight: 500; }
 .sd .adm-table td .adm-act { text-decoration: none; font-weight: 500; }
 .sd .adm-st.pending, .sd .adm-st.unpaid { color: #e8821a; }

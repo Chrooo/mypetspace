@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const RoomReservation = require('../models/RoomReservation');
 const PetModel = require('../models/Pet');
 const { logAction } = require('../utils/audit');
+const { sendHotelEmail } = require('../utils/mailer');
 const { ROOM_TYPES, findRoom, buildStay, hasFreeWindow } = require('../utils/rooms');
 
 const FULL_MESSAGE = 'That slot was just booked by someone else. Please choose another slot.';
@@ -135,6 +136,7 @@ const createReservation = async (req, res) => {
     }
 
     await logAction('Room Booked', req.user, { affected: `${pet.name} - ${room.name} #${slotNo}` });
+    sendHotelEmail('booked', reservation, req.user); // not awaited: the booking never waits for the email
     res.status(201).json({ reservation });
   } catch (err) {
     serverError(res, err);
